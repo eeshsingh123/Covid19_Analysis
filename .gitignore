@@ -1,3 +1,8 @@
+# Project level gitignore
+creds/
+twitter_db/
+.idea/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
