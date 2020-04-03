@@ -27,8 +27,6 @@ class Listener(StreamListener):
 
     def on_data(self, data):
         try:
-            geo_data, coordinates_data, place_data = "", "", ""
-
             tweet = json.loads(data)
             if tweet["retweeted"] or tweet["text"].startswith("RT"):
                 return True
@@ -36,34 +34,22 @@ class Listener(StreamListener):
             user_verified = tweet["user"]["verified"]
             id_str = tweet["id_str"]
             created_at = tweet["created_at"]
-            retweet_count = tweet["retweet_count"]
-            fav_count = tweet["favorite_count"]
             user_location = de_emojify(tweet["user"].get("location", ""))
+            user_name = de_emojify(tweet["user"].get("name", ""))
+            screen_name = de_emojify(tweet["user"].get("screen_name", ""))
             if not tweet["truncated"]:
                 tweet_data = de_emojify(unidecode(tweet["text"]))
             else:
                 tweet_data = de_emojify(unidecode(tweet['extended_tweet']['full_text']))
-            if tweet["user"].get("geo", {}):
-                geo_data = tweet["geo"]
-            if tweet.get('coordinates', {}):
-                coordinates_data = tweet["coordinates"]
-            if tweet.get("place", {}):
-                place_data = tweet["place"]
 
             print("TEXT-> ", tweet_data)
             print("CREATED_AT-> ", created_at)
             print("USER_LOCATION-> ", user_location)
             print("VERIFIED-> ", user_verified)
-            print("GEO-> ", geo_data)
-            print("COORDINATES-> ", coordinates_data)
-            print("PLACE-> ", place_data)
-            print("RT COUNT-> ", retweet_count)
-            print("LIKE COUNT-> ", fav_count)
             print('---------------------------------------------------------------------\n')
 
             self.value_list.append((
-                id_str, tweet_data, created_at, user_location, geo_data,
-                coordinates_data, place_data, retweet_count, fav_count, user_verified
+                id_str, tweet_data, created_at, user_location, user_name, screen_name, user_verified
             ))
 
             if len(self.value_list) > self.thresh:

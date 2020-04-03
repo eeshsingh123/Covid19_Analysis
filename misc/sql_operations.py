@@ -20,6 +20,9 @@ class SqlHelper:
         self.cursor = self.conn.cursor()
 
         print("Creating Table")
+        self.cursor.execute("PRAGMA journal_mode=wal")
+        self.cursor.execute("PRAGMA wal_checkpoint=TRUNCATE")
+
         self.cursor.execute(
             f"""CREATE TABLE IF NOT EXISTS {TABLE_NAME}({TABLE_ATTRIBUTES['base']})""")
         self.cursor.execute(f"""CREATE INDEX IF NOT EXISTS fast_tweet on {TABLE_NAME}(tweet)""")
@@ -31,8 +34,8 @@ class SqlHelper:
 
     def insert_into_table(self, values_list):
         self.cursor = self.conn.cursor()
-        sql_query = f"""INSERT INTO {TABLE_NAME}(id_str, tweet, created_at, user_location, geo_data, coordinates, place, retweet_count, like_count, verified)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+        sql_query = f"""INSERT INTO {TABLE_NAME}(id_str, tweet, created_at, user_location, user_name, screen_name, verified)
+                        VALUES(?, ?, ?, ?, ?, ?, ?)"""
         self.cursor.executemany(sql_query, values_list)
         print("Bulk insert complete")
         self.conn.commit()
@@ -44,6 +47,7 @@ class SqlHelper:
         self.cursor.execute(f"""DROP TABLE {TABLE_NAME}""")
         self.conn.commit()
         self.cursor.close()
+
 
 if __name__ == "__main__":
     sq = SqlHelper()
