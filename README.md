@@ -41,14 +41,14 @@ it runs daily based on predefined constraints
 
 ### App:
 1. Full App
-![imgmain](C:\\Projects\\Python_projects\\Covid19_Analysis\\app_images\\full_app.gif)
+![imgmain](full_app.gif)
 
 2. Graphs
-![img1](C:\\Projects\\Python_projects\\Covid19_Analysis\\app_images\\data_disp.gif)
+![img1](data_disp.gif)
 
-![img2](C:\\Projects\\Python_projects\Covid19_Analysis\\app_images\\data_disp_specs.gif)
+![img2](data_disp_specs.gif)
 
 3. Live Twitter Feed
-![imgtwit](C:\\Projects\\Python_projects\\Covid19_Analysis\\app_images\\tweets_disp.gif)
+![imgtwit](tweets_disp.gif)
 
 
