@@ -6,7 +6,7 @@ from config import BASE_PATH
 from kaggle.api.kaggle_api_extended import KaggleApi
 
 
-def call_kaggle_api():
+def download_data_from_kaggle():
     kaggle_api = KaggleApi()
     kaggle_api.authenticate()
 
@@ -15,12 +15,12 @@ def call_kaggle_api():
 
     kaggle_api.dataset_download_files("sudalairajkumar/novel-corona-virus-2019-dataset",
                                       path=f"{BASE_PATH}//twitter_db//kaggle_data//",
-                                      force=True, unzip=True, quiet=False)
+                                      force=True, unzip=True, quiet=True)
 
     return True
 
 
 if __name__ == "__main__":
-    call_kaggle_api()
+    download_data_from_kaggle()
 
 

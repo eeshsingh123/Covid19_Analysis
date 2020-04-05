@@ -1,6 +1,7 @@
 import time
+import pickle
 import sqlite3
-from config import BASE_PATH, TABLE_ATTRIBUTES, TABLE_NAME
+from config import BASE_PATH, TABLE_ATTRIBUTES, TABLE_NAME, TRENDING_TABLE_NAME
 
 
 class SqlHelper:
@@ -25,6 +26,7 @@ class SqlHelper:
 
         self.cursor.execute(
             f"""CREATE TABLE IF NOT EXISTS {TABLE_NAME}({TABLE_ATTRIBUTES['base']})""")
+        self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {TRENDING_TABLE_NAME}(key TEXT PRIMARY KEY, value BLOB)")
         self.cursor.execute(f"""CREATE INDEX IF NOT EXISTS fast_tweet on {TABLE_NAME}(tweet)""")
         self.cursor.execute(f"""CREATE INDEX IF NOT EXISTS fast_id_str on {TABLE_NAME}(id_str)""")
         self.conn.commit()
@@ -34,14 +36,32 @@ class SqlHelper:
 
     def insert_into_table(self, values_list):
         self.cursor = self.conn.cursor()
-        sql_query = f"""INSERT INTO {TABLE_NAME}(id_str, tweet, created_at, user_location, user_name, screen_name, verified)
-                        VALUES(?, ?, ?, ?, ?, ?, ?)"""
+        sql_query = f"""INSERT INTO {TABLE_NAME}(id_str, tweet, created_at, user_location, user_name, screen_name, verified, sentiment)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?)"""
         self.cursor.executemany(sql_query, values_list)
         print("Bulk insert complete")
         self.conn.commit()
         self.cursor.close()
 
     # BE CAUTIOUS WHILE USING THIS
+
+    def replace_into_trending_table(self, trending_data):
+        self.cursor = self.conn.cursor()
+        self.cursor.execute(
+            f"REPLACE INTO {TRENDING_TABLE_NAME} (key, value) VALUES ('trending', ?)", (pickle.dumps(trending_data),)
+        )
+        self.conn.commit()
+        self.cursor.close()
+
+    def delete_data_from_db(self, data_count):
+        self.cursor = self.conn.cursor()
+        self.cursor.execute(
+            f"DELETE FROM {TABLE_NAME} WHERE id < {data_count}"
+        )
+        self.conn.commit()
+        self.cursor.close()
+        return True
+
     def drop_table(self):
         self.cursor = self.conn.cursor()
         self.cursor.execute(f"""DROP TABLE {TABLE_NAME}""")
