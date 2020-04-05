@@ -41,14 +41,14 @@ it runs daily based on predefined constraints
 
 ### App:
 1. Full App
-![imgmain](full_app.gif)
+<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
 
 2. Graphs
-![img1](data_disp.gif)
+<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
 
-![img2](data_disp_specs.gif)
+<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
 
 3. Live Twitter Feed
-![imgtwit](tweets_disp.gif)
+<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
 
 
