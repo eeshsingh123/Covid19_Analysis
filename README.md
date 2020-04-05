@@ -45,6 +45,11 @@ it runs daily based on predefined constraints
 
 2. Graphs
 
+![](data_disp.gif)
+
+![](data_disp_specs.gif)
+
 3. Live Twitter Feed
+![](tweets_disp.gif)
 
 
