@@ -41,7 +41,7 @@ it runs daily based on predefined constraints
 
 ### App:
 1. Full App
-![](https://imgflip.com/gif/3vgyb8)
+![](full_app.gif)
 
 2. Graphs
 
