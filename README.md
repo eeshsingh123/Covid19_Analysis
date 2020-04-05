@@ -49,7 +49,7 @@ it runs daily based on predefined constraints
 
 ![](data_disp_specs.gif)
 
-3. Live Twitter Feed
+3. Live Twitter Feed (Color coded sentiment wise)
 ![](tweets_disp.gif)
 
 
