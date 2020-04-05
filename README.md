@@ -15,8 +15,7 @@
 3. Follow these steps to generate a Kaggle API token: https://github.com/Kaggle/kaggle-api
 4. Save the kaggle.json key to `C:\Users\<username>\.kaggle` if on Windows OS
 
-5. Create a directory `twitter_db` in the project root folder where our Database will be saved
-Create a directory `kaggle_data in it` i.e.  `\twitter_db\kaggle_data`
+5. Create a directory `twitter_db` in the project root folder where our Database will be saved, then Create a directory `kaggle_data in it` i.e.  `\twitter_db\kaggle_data`
 
 ### Steps to Run:
 1. Clone the repository `https://github.com/eeshsingh123/Covid19_Analysis.git`
@@ -39,4 +38,17 @@ it runs daily based on predefined constraints
 5. `misc\dbclean_daily.py`:  Cleans Database everyday to keep the size in check. Runs daily based on predefined constraints
 
 6. `\tools` : Contains Helper functions to perform tasks needed
+
+### App:
+1. Full App
+![](C:\Projects\Python_projects\Covid19_Analysis\app_images\full_app.gif)
+
+2. Graphs
+![](C:\Projects\Python_projects\Covid19_Analysis\app_images\data_disp.gif)
+
+![](C:\Projects\Python_projects\Covid19_Analysis\app_images\data_disp_specs.gif)
+
+3. Live Twitter Feed
+![](C:\Projects\Python_projects\Covid19_Analysis\app_images\tweets_disp.gif)
+
 
