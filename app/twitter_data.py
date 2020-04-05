@@ -44,7 +44,7 @@ class Listener(StreamListener):
                 return True
 
             user_verified = tweet["user"]["verified"]
-            id_str = tweet["id_str"]
+            timestamp_ms = int(time.time())
             created_at = tweet["created_at"]
             user_location = de_emojify(tweet["user"].get("location", ""))
             user_name = de_emojify(tweet["user"].get("name", ""))
@@ -64,7 +64,7 @@ class Listener(StreamListener):
             print('---------------------------------------------------------------------\n')
 
             self.value_list.append((
-                id_str, tweet_data, created_at, user_location, user_name, screen_name, user_verified, sentiment
+                timestamp_ms, tweet_data, created_at, user_location, user_name, screen_name, user_verified, sentiment
             ))
             self.counter += 1
             if self.counter % 2000 == 0:

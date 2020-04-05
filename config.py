@@ -11,7 +11,7 @@ POS_NEG_NEUT = 0.1
 TABLE_ATTRIBUTES = {
     "base": """
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_str TEXT,
+    timestamp_ms INTEGER,
     tweet TEXT,
     created_at TEXT,
     user_location TEXT,

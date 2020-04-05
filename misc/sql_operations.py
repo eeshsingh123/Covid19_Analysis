@@ -28,7 +28,7 @@ class SqlHelper:
             f"""CREATE TABLE IF NOT EXISTS {TABLE_NAME}({TABLE_ATTRIBUTES['base']})""")
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {TRENDING_TABLE_NAME}(key TEXT PRIMARY KEY, value BLOB)")
         self.cursor.execute(f"""CREATE INDEX IF NOT EXISTS fast_tweet on {TABLE_NAME}(tweet)""")
-        self.cursor.execute(f"""CREATE INDEX IF NOT EXISTS fast_id_str on {TABLE_NAME}(id_str)""")
+        self.cursor.execute(f"""CREATE INDEX IF NOT EXISTS fast_timestamp_ms on {TABLE_NAME}(timestamp_ms)""")
         self.conn.commit()
         self.cursor.close()
 
@@ -36,7 +36,7 @@ class SqlHelper:
 
     def insert_into_table(self, values_list):
         self.cursor = self.conn.cursor()
-        sql_query = f"""INSERT INTO {TABLE_NAME}(id_str, tweet, created_at, user_location, user_name, screen_name, verified, sentiment)
+        sql_query = f"""INSERT INTO {TABLE_NAME}(timestamp_ms, tweet, created_at, user_location, user_name, screen_name, verified, sentiment)
                         VALUES(?, ?, ?, ?, ?, ?, ?, ?)"""
         self.cursor.executemany(sql_query, values_list)
         print("Bulk insert complete")
@@ -53,10 +53,10 @@ class SqlHelper:
         self.conn.commit()
         self.cursor.close()
 
-    def delete_data_from_db(self, data_count):
+    def delete_data_from_db(self, threshold_time):
         self.cursor = self.conn.cursor()
         self.cursor.execute(
-            f"DELETE FROM {TABLE_NAME} WHERE id < {data_count}"
+            f"DELETE FROM {TABLE_NAME} WHERE timestamp_ms < {threshold_time}"
         )
         self.conn.commit()
         self.cursor.close()

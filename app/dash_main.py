@@ -13,8 +13,6 @@ import plotly
 import plotly.graph_objs as go
 from rq_scheduler import Scheduler
 
-from misc.update_daily_data import download_data_from_kaggle
-from misc.dbclean_daily import clean_db_daily
 from misc.sql_operations import SqlHelper
 from config import APP_COLORS, BASE_PATH, TABLE_NAME, TRENDING_TABLE_NAME, SENTIMENT_COLORS
 from tools.date_checker import check_date_validity
@@ -23,6 +21,7 @@ from tools.generate_table import generate_table
 app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
 today = datetime.datetime.now()
+
 status_dict = check_date_validity(today)
 if not status_dict.get("status", "") == "successful":
     print("Error in data Update ->", status_dict.get("reason", ""))
@@ -181,7 +180,7 @@ def display_all_data(country, gtype):
               [Input('recent-table-update-unverified', 'n_intervals')])
 def update_recent_tweets_unverified(input_data):
     df = pd.read_sql(f"SELECT * FROM {TABLE_NAME} ORDER BY id DESC LIMIT 5", sql_helper.conn)
-    df = df.drop(['id_str'], axis=1)
+    df = df.drop(['timestamp_ms'], axis=1)
     df = df[df["verified"] == 0]
     df = df[['created_at', 'user_name', 'tweet', 'user_location', 'sentiment']]
     df.columns = ["Date", "Username", "Tweet", "Tweeted Location", "Sentiment"]
@@ -192,7 +191,7 @@ def update_recent_tweets_unverified(input_data):
               [Input('recent-table-update-verified', 'n_intervals')])
 def update_recent_tweets_verified(input_data):
     df = pd.read_sql(f"SELECT * FROM {TABLE_NAME} ORDER BY id DESC LIMIT 1000", sql_helper.conn)
-    df = df.drop(['id_str'], axis=1)
+    df = df.drop(['timestamp_ms'], axis=1)
     df = df[df["verified"] == 1].iloc[:5, :]
     df = df[['created_at', 'user_name', 'tweet', 'user_location', 'sentiment']]
     df.columns = ["Date", "Username", "Tweet", "Tweeted Location", "Sentiment"]
