@@ -44,11 +44,7 @@ it runs daily based on predefined constraints
 ![](https://imgflip.com/gif/3vgxed)
 
 2. Graphs
-![](http://i.imgur.com/OUkLi.gif)
-
-![](http://i.imgur.com/OUkLi.gif)
 
 3. Live Twitter Feed
-<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
 
 
