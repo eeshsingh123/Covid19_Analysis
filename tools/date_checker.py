@@ -11,11 +11,11 @@ def check_date_validity(today):
         current_day = today.day
         with open(f"{BASE_PATH}\\misc\\last_updated.json", 'r') as fp:
             saved_day = json.load(fp)
-        last_updated_day = datetime.datetime.strptime(saved_day['last_updated'], "%d-%m-%Y").day
+        last_updated_day = datetime.datetime.strptime(saved_day['last_updated'], "%d-%m-%Y %H:%M:%S").day
 
         if current_day - last_updated_day == 1:
             print("One day passed, updating new data")
-            new_update_day = {"last_updated": datetime.datetime.strftime(today, "%d-%m-%Y")}
+            new_update_day = {"last_updated": datetime.datetime.strftime(today, "%d-%m-%Y %H:%M:%S")}
             with open(f"{BASE_PATH}\\misc\\last_updated.json", 'w') as fp:
                 json.dump(new_update_day, fp)
             download_data_from_kaggle()
@@ -27,5 +27,5 @@ def check_date_validity(today):
         }
     return {
         "status": "successful",
-        "reason": "complete"
+        "new_date": saved_day['last_updated']
     }

@@ -24,9 +24,7 @@ app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen
 
 today = datetime.datetime.now()
 status_dict = check_date_validity(today)
-if status_dict.get("status", "") == "successful":
-    print("Data Updated successfully")
-else:
+if not status_dict.get("status", "") == "successful":
     print("Error in data Update ->", status_dict.get("reason", ""))
 
 sql_helper = SqlHelper()
@@ -39,7 +37,7 @@ most_common_countries = [k for k, _ in Counter(covid_data["Country/Region"]).mos
 app.layout = html.Div([
     html.Div([
         html.H1("COVID-19 Dashboard", style={"textAlign": "center"}),
-        html.Label(f"Last Updated: {today}", style={"textAlign": "center", "opacity": 0.5}),
+        html.Label(f"Last Updated: {status_dict.get('new_date', today)}", style={"textAlign": "center", "opacity": 0.5}),
         dcc.Graph(id="master-data-display")
     ]),
 
