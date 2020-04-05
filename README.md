@@ -41,12 +41,12 @@ it runs daily based on predefined constraints
 
 ### App:
 1. Full App
-<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
+![](https://imgflip.com/gif/3vgxed)
 
 2. Graphs
-<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
+![](http://i.imgur.com/OUkLi.gif)
 
-<a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
+![](http://i.imgur.com/OUkLi.gif)
 
 3. Live Twitter Feed
 <a href="https://imgflip.com/gif/3vgxed"><img src="https://imgflip.com/gif/3vgxed" title="Full app"></a>
