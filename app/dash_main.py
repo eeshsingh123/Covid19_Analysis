@@ -2,6 +2,7 @@ import pickle
 import datetime
 import json
 from collections import Counter
+import random
 
 import numpy as np
 import pandas as pd
@@ -46,7 +47,7 @@ app.layout = html.Div([
             dcc.Dropdown(
                 id="dropdown-countries",
                 options=[{"label": i, "value": i} for i in most_common_countries],
-                value=['Mainland China', 'US'],
+                value=random.choices(most_common_countries, k=10),
                 multi=True
             ),
             dcc.RadioItems(
@@ -131,16 +132,15 @@ def display_country_specific_data(country, display_type):
                 x=agg_df["ObservationDate"],
                 y=agg_df[display_type],
                 mode="lines",
-                opacity=0.5,
-                name=cname
+                opacity=1,
+                name=cname,
+                hoverinfo="x+y+name",
             )
         )
     graphs = [graph]
     data = [val for sublist in graphs for val in sublist]
     figure = {'data': data,
               'layout': go.Layout(
-                  colorway=["#5E0DAC", '#FF4F00', '#37B153',
-                            '#FF7400', '#F542C5', '#AAF542'],
                   height=600,
                   title=f"Covid-19 {display_type} cases",
                   xaxis={"title": "ObservationDate"},
@@ -250,7 +250,7 @@ def update_trending_data(input_data):
             cells=dict(values=[t[0] for t in related_terms],
                        fill_color='lavender',
                        align='center',
-                       font=dict(color='black', size=25),
+                       font=dict(color='black', size=18),
                        height=50
                        ))
         ],
