@@ -11,11 +11,13 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly
+import plotly.express as px
 import plotly.graph_objs as go
 from rq_scheduler import Scheduler
 
 from misc.sql_operations import SqlHelper
 from config import APP_COLORS, BASE_PATH, TABLE_NAME, TRENDING_TABLE_NAME, SENTIMENT_COLORS
+from config import COUNTRY_CODE, convert_ISO_3166_2_to_1
 from tools.date_checker import check_date_validity
 from tools.generate_table import generate_table
 
@@ -33,6 +35,10 @@ covid_data["ObservationDate"] = pd.to_datetime(covid_data["ObservationDate"])
 covid_data["Last Update"] = pd.to_datetime(covid_data["Last Update"])
 
 most_common_countries = [k for k, _ in Counter(covid_data["Country/Region"]).most_common(150)]
+
+for key, value in COUNTRY_CODE.items():
+    if value in convert_ISO_3166_2_to_1:
+        COUNTRY_CODE[key] = convert_ISO_3166_2_to_1[value]
 
 app.layout = html.Div([
     html.Div([
@@ -78,6 +84,11 @@ app.layout = html.Div([
     ], className="row"),
 
     html.Div(className="row", children=[
+        html.H2("Transmission of Virus across the World", style={"textAlign": "center"}),
+        dcc.Graph(id='world-map-projection', style={"width": "100%"})
+    ]),
+
+    html.Div(className="row", children=[
         html.H2("Recent Trending Terms", style={"textAlign": "center"}),
         dcc.Graph(id='recent-trending-data', style={'margin-right': '15px'})
     ]),
@@ -107,6 +118,11 @@ app.layout = html.Div([
     dcc.Interval(
         id='recent-table-update-verified',
         interval=5 * 1000,
+        n_intervals=0
+    ),
+    dcc.Interval(
+        id='world-map-update',
+        interval=1 * 1000 * 86400,
         n_intervals=0
     ),
     dcc.Interval(
@@ -261,6 +277,32 @@ def update_trending_data(input_data):
 
         )
         fig.layout['template']['data']['table'][0]['header']['fill']['color'] = 'rgba(0,0,0,0)'
+        return fig
+
+    except Exception as e:
+        print(str(e))
+
+
+@app.callback(Output(component_id="world-map-projection", component_property="figure"),
+              [Input(component_id="world-map-update", component_property="n_intervals")])
+def world_map_projection(input_data):
+    try:
+        agg_df = covid_data.groupby(["ObservationDate", "Country/Region"]).agg(
+            {"Confirmed": "sum"}).reset_index()
+        agg_df["iso_alpha"] = agg_df["Country/Region"].map(COUNTRY_CODE)
+        agg_df.dropna(inplace=True)
+        agg_df["Confirmed"] = agg_df["Confirmed"].astype(int)
+        agg_df.sort_values(by="ObservationDate", inplace=True)
+        agg_df["ObservationDate"] = agg_df["ObservationDate"].astype('str')
+
+        fig = px.choropleth(
+            agg_df, locations="iso_alpha",
+            hover_name="Country/Region",
+            animation_frame="ObservationDate",
+            color="Confirmed",
+            projection="natural earth",
+        )
+        fig.update_layout(width=1900, height=500, margin={"r": 0, "t": 0, "l": 0, "b": 0})
         return fig
 
     except Exception as e:
