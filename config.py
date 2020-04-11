@@ -38,7 +38,7 @@ SENTIMENT_COLORS = {
     1: "#9CEC5B"
 }
 
-STOP_WORDS = ['', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves',
+STOP_WORDS = ['', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'covid', '19', 'corona', 'please',
               'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him',
               'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its',
               'itself', 'they', 'them', 'their', 'theirs', 'themselves',

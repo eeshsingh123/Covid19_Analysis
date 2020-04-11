@@ -171,24 +171,41 @@ def display_country_specific_data(country, display_type):
 def display_all_data(country, gtype):
     agg_df = covid_data[covid_data["Country/Region"] == country].groupby("ObservationDate").agg(
         {"Confirmed": "sum", "Deaths": "sum", "Recovered": "sum"}).reset_index()
+    diff_df = agg_df.set_index('ObservationDate').diff().reset_index()
+    diff_df.columns = ["ObservationDate", "Confirmed_delta", "Deaths_delta", "Recovered_delta"]
+    agg_df = agg_df.merge(diff_df, on='ObservationDate')
+    agg_df.fillna(0.0, inplace=True)
+
     figure = {
         "data": [
             {"x": agg_df["ObservationDate"], "y": agg_df["Confirmed"], "name": "Confirmed"},
             {"x": agg_df["ObservationDate"], "y": agg_df["Deaths"], "name": "Deaths"},
             {"x": agg_df["ObservationDate"], "y": agg_df["Recovered"], "name": "Recovered"},
+            {"x": agg_df["ObservationDate"], "y": agg_df["Confirmed_delta"], "type":"bar",
+             "name":"Daily Confirm Increase", "opacity":0.5},
+            {"x": agg_df["ObservationDate"], "y": agg_df["Deaths_delta"], "type": "bar", "name": "Daily Death Increase",
+             "opacity": 0.5},
+            {"x": agg_df["ObservationDate"], "y": agg_df["Recovered_delta"], "type": "bar",
+             "name": "Daily Recover Increase", "opacity": 0.5}
+
         ] if gtype == "Linear" else [
             {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Confirmed"]), "name": "Confirmed"},
             {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Deaths"]), "name": "Deaths"},
             {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Recovered"]), "name": "Recovered"},
+            {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Confirmed_delta"]), "type": "bar",
+             "name": "Daily Confirm Increase", "opacity": 0.5},
+            {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Deaths_delta"]), "type": "bar", "name": "Daily Death Increase",
+             "opacity": 0.5},
+            {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Recovered_delta"]), "type": "bar",
+             "name": "Daily Recover Increase", "opacity": 0.5}
         ],
         "layout": go.Layout(
-            colorway=["#5E0DAC", '#FF4F00', '#37B153',
-                      '#FF7400', '#FFF400', '#FF0056'],
             height=600,
             title=f"All cases",
             xaxis={"title": "ObservationDate"},
             yaxis={"title": "Count"})
     }
+
     return figure
 
 
