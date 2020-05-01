@@ -13,7 +13,7 @@ def check_date_validity(today):
             saved_day = json.load(fp)
         last_updated_day = datetime.datetime.strptime(saved_day['last_updated'], "%d-%m-%Y %H:%M:%S").day
 
-        if current_day - last_updated_day >= 1:
+        if abs(current_day - last_updated_day) >= 1:
             print("One day passed, updating new data")
             new_update_day = {"last_updated": datetime.datetime.strftime(today, "%d-%m-%Y %H:%M:%S")}
             with open(f"{BASE_PATH}\\misc\\last_updated.json", 'w') as fp:

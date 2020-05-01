@@ -26,6 +26,7 @@ app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen
 today = datetime.datetime.now()
 
 status_dict = check_date_validity(today)
+print(status_dict)
 if not status_dict.get("status", "") == "successful":
     print("Error in data Update ->", status_dict.get("reason", ""))
 
