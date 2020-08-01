@@ -20,6 +20,7 @@ from config import APP_COLORS, BASE_PATH, TABLE_NAME, TRENDING_TABLE_NAME, SENTI
 from config import COUNTRY_CODE, convert_ISO_3166_2_to_1
 from tools.date_checker import check_date_validity
 from tools.generate_table import generate_table
+from tools.preprocess_daily_change_df import prepare_df
 
 app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
@@ -71,7 +72,7 @@ app.layout = html.Div([
             dcc.Dropdown(
                 id="dropdown-1-country",
                 options=[{"label": i, "value": i} for i in most_common_countries],
-                value="Mainland China",
+                value="India",
                 multi=False
             ),
             dcc.RadioItems(
@@ -84,10 +85,24 @@ app.layout = html.Div([
         ], className="six columns"),
     ], className="row"),
 
-    html.Div(className="row", children=[
-        html.H2("Transmission of Virus across the World", style={"textAlign": "center"}),
-        dcc.Graph(id='world-map-projection', style={"width": "100%"})
-    ]),
+    html.Div([
+        # new work
+        html.Div([
+            html.H2("Daily Change in Cases"),
+            dcc.Dropdown(
+                id="dropdown-2-country",
+                options=[{"label": i, "value": i} for i in most_common_countries],
+                value="India",
+                multi=False
+            ),
+            dcc.Graph(id="daily-change-graph")
+        ], className="six columns"),
+
+        html.Div([
+            html.H2("Transmission of Virus across the World"),
+            dcc.Graph(id='world-map-projection')
+        ], className="six columns"),
+    ], className="row"),
 
     html.Div(className="row", children=[
         html.H2("Recent Trending Terms", style={"textAlign": "center"}),
@@ -172,9 +187,6 @@ def display_country_specific_data(country, display_type):
 def display_all_data(country, gtype):
     agg_df = covid_data[covid_data["Country/Region"] == country].groupby("ObservationDate").agg(
         {"Confirmed": "sum", "Deaths": "sum", "Recovered": "sum"}).reset_index()
-    diff_df = agg_df.set_index('ObservationDate').diff().reset_index()
-    diff_df.columns = ["ObservationDate", "Confirmed_delta", "Deaths_delta", "Recovered_delta"]
-    agg_df = agg_df.merge(diff_df, on='ObservationDate')
     agg_df.fillna(0.0, inplace=True)
 
     figure = {
@@ -182,27 +194,51 @@ def display_all_data(country, gtype):
             {"x": agg_df["ObservationDate"], "y": agg_df["Confirmed"], "name": "Confirmed"},
             {"x": agg_df["ObservationDate"], "y": agg_df["Deaths"], "name": "Deaths"},
             {"x": agg_df["ObservationDate"], "y": agg_df["Recovered"], "name": "Recovered"},
-            {"x": agg_df["ObservationDate"], "y": agg_df["Confirmed_delta"], "type":"bar",
-             "name":"Daily Confirm Increase", "opacity":0.5},
-            {"x": agg_df["ObservationDate"], "y": agg_df["Deaths_delta"], "type": "bar", "name": "Daily Death Increase",
-             "opacity": 0.5},
-            {"x": agg_df["ObservationDate"], "y": agg_df["Recovered_delta"], "type": "bar",
-             "name": "Daily Recover Increase", "opacity": 0.5}
 
         ] if gtype == "Linear" else [
             {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Confirmed"]), "name": "Confirmed"},
             {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Deaths"]), "name": "Deaths"},
             {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Recovered"]), "name": "Recovered"},
-            {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Confirmed_delta"]), "type": "bar",
-             "name": "Daily Confirm Increase", "opacity": 0.5},
-            {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Deaths_delta"]), "type": "bar", "name": "Daily Death Increase",
-             "opacity": 0.5},
-            {"x": agg_df["ObservationDate"], "y": np.log1p(agg_df["Recovered_delta"]), "type": "bar",
-             "name": "Daily Recover Increase", "opacity": 0.5}
         ],
         "layout": go.Layout(
             height=600,
             title=f"All cases",
+            xaxis={"title": "ObservationDate"},
+            yaxis={"title": "Count"})
+    }
+
+    return figure
+
+
+@app.callback(Output(component_id='daily-change-graph', component_property='figure'),
+              [Input(component_id='dropdown-2-country', component_property='value')])
+def display_daily_change_data(country):
+    daily_change_data = prepare_df(country=country)
+    figure = {
+        "data": [
+            {
+                "x": daily_change_data["Date"],
+                "y": daily_change_data["Confirmed"],
+                "mode": "lines",
+                "name": "Daily Confirmed"
+            },
+            {
+                "x": daily_change_data["Date"],
+                "y": daily_change_data["Deaths"],
+                "mode": "lines",
+                "name": "Daily Deaths"
+            },
+            {
+                "x": daily_change_data["Date"],
+                "y": daily_change_data["Recovered"],
+                "mode": "lines",
+                "name": "Daily Recovered"
+            }
+
+        ],
+        "layout": go.Layout(
+            height=600,
+            title=f"Daily Changes in Cases",
             xaxis={"title": "ObservationDate"},
             yaxis={"title": "Count"})
     }
@@ -320,7 +356,6 @@ def world_map_projection(input_data):
             color="Confirmed",
             projection="natural earth",
         )
-        fig.update_layout(width=1900, height=500, margin={"r": 0, "t": 0, "l": 0, "b": 0})
         return fig
 
     except Exception as e:

@@ -107,7 +107,17 @@ if __name__ == "__main__":
             auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
             twitter_stream = Stream(auth, Listener())
 
-            track = ["Corona", "corona", "Covid-19", "Covid19", "Corona Virus", "corona virus"]
+            track = [
+                "Corona",
+                "corona",
+                "Covid-19",
+                "Covid19",
+                "Corona Virus",
+                "corona virus",
+                "Covid 19",
+                "Vaccine",
+                "World Health Organization"
+            ]
             twitter_stream.filter(track=track, languages=["en"])
         except Exception as e:
             print(str(e))
