@@ -40,6 +40,10 @@ it runs daily based on predefined constraints
 6. `\tools` : Contains Helper functions to perform tasks needed
 
 ### App:
+**New Feature**
+![](daily_change.png)
+![](world.png)
+
 1. Full App
 ![](full_app.gif)
 
