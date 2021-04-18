@@ -1,4 +1,5 @@
 # Project level gitignore
+data/
 creds/
 twitter_db/
 .idea/
