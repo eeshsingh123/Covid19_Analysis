@@ -41,19 +41,19 @@ it runs daily based on predefined constraints
 
 ### App:
 **New Feature**
-![](daily_change.png)
-![](world.png)
+![](misc/daily_change.png)
+![](misc/world.png)
 
 1. Full App
-![](full_app.gif)
+![](misc/full_app.gif)
 
 2. Graphs
 
-![](data_disp.gif)
+![](misc/data_disp.gif)
 
-![](data_disp_specs.gif)
+![](misc/data_disp_specs.gif)
 
 3. Live Twitter Feed (Color coded sentiment wise)
-![](tweets_disp.gif)
+![](misc/tweets_disp.gif)
 
 

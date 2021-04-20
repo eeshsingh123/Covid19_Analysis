@@ -4,6 +4,9 @@ import json
 DEBUG = os.environ.get("DEBUG", True)
 BASE_PATH = os.environ.get("BASE_PATH", os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis'))
 BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH", os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis', 'data'))
+if not os.path.isdir(BASE_PATH):
+    os.mkdir(BASE_DATA_PATH)
+
 TEMPLATES_PATH = os.environ.get("EDA_TEMPLATES_PATH", os.path.join(os.sep, BASE_PATH, "templates"))
 STATIC_PATH = os.environ.get("EDA_STATIC_PATH", os.path.join(os.sep, BASE_PATH, "static"))
 
@@ -30,8 +33,28 @@ with open(os.path.join(os.sep, BASE_DATA_PATH, 'default_objects', 'stopword_coll
 with open(os.path.join(os.sep, BASE_DATA_PATH, 'default_objects', 'country_codes.json'), 'r') as cc:
     COUNTRY_CODE = json.load(cc)
 
-with open(os.path.join(os.sep, BASE_DATA_PATH, 'default_objects', 'country_iso_2_1_conversion.json'), 'r') as cc:
-    convert_ISO_3166_2_to_1 = json.load(cc)
+with open(os.path.join(os.sep, BASE_DATA_PATH, 'default_objects', 'country_iso_2_1_conversion.json'), 'r') as cio:
+    convert_ISO_3166_2_to_1 = json.load(cio)
+
+with open(os.path.join(os.sep, BASE_DATA_PATH, 'default_objects', 'state_code_mapper.json'), 'r') as sc:
+    STATE_CODE_MAPPER = json.load(sc)
+
+PATHS = {
+    "time_series_df": "https://api.covid19india.org/csv/latest/case_time_series.csv",
+    "states": {
+        "state_total": "https://api.covid19india.org/csv/latest/state_wise.csv",
+        "state_daily": "https://api.covid19india.org/csv/latest/states.csv",
+    },
+    "districts": {
+        "district_total": "https://api.covid19india.org/csv/latest/district_wise.csv",
+        "district_daily": "https://api.covid19india.org/csv/latest/districts.csv",
+    },
+
+    "vaccination": {
+        "state_daily": "http://api.covid19india.org/csv/latest/cowin_vaccine_data_statewise.csv",
+        "state_total": "http://api.covid19india.org/csv/latest/vaccine_doses_statewise.csv"
+    }
+}
 
 # OLD DASH BASED PROJECT CODE
 TABLE_NAME = "covid"
