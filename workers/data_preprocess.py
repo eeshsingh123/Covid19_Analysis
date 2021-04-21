@@ -44,6 +44,8 @@ class GraphDataFormatter:
 
         self.vaccine_state_total_df = pd.read_csv(self.path['vaccination']['state_total'])
 
+        print("All Dataframes Loaded Successfully!")
+
     def get_current_days_data(self):
         current_stats = dict(self.state_wise_total_df.iloc[0])
         current_vaccine_administered = list(self.vaccine_state_total_df.iloc[-1])[-1]
@@ -62,7 +64,7 @@ class GraphDataFormatter:
             "data": [
                 {
                     'name': f'Total {d_type}',
-                    'x': list(total_cases_df['Date']),
+                    'x': list(total_cases_df['Date_YMD']),
                     'y': list(total_cases_df[f'Total {d_type}'])
                 }
                 for d_type in ['Confirmed', 'Recovered', 'Deceased']
@@ -73,7 +75,7 @@ class GraphDataFormatter:
             "data": [
                 {
                     'name': f'Daily {d_type}',
-                    'x': list(daily_cases_df['Date']),
+                    'x': list(daily_cases_df['Date_YMD']),
                     'y': list(daily_cases_df[f'Daily {d_type}'])
                 }
                 for d_type in ['Confirmed', 'Recovered', 'Deceased']

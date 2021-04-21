@@ -7,6 +7,16 @@ BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH", os.path.join(os.sep, 'Projects
 if not os.path.isdir(BASE_PATH):
     os.mkdir(BASE_DATA_PATH)
 
+COVID_TRACK_WORDS = ['corona', 'covid19', 'covid-19', 'pandemic', 'virus', 'vaccine', 'vaccination']
+
+BED_TRACK_WORDS = ['bed', 'beds', 'hospital bed', 'urgent bed', 'hospitals', 'bed shortage',
+                   'bed needed', 'beds needed', 'bed help', 'need bed', 'need beds']
+
+OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', 'help oxygen', 'oxygen shortage',
+                      'hospital oxygen', 'urgent oxygen', 'oxygen help']
+
+VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
+
 TEMPLATES_PATH = os.environ.get("EDA_TEMPLATES_PATH", os.path.join(os.sep, BASE_PATH, "templates"))
 STATIC_PATH = os.environ.get("EDA_STATIC_PATH", os.path.join(os.sep, BASE_PATH, "static"))
 
