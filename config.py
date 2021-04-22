@@ -15,6 +15,12 @@ BED_TRACK_WORDS = ['bed', 'beds', 'hospital bed', 'urgent bed', 'hospitals', 'be
 OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', 'help oxygen', 'oxygen shortage',
                       'hospital oxygen', 'urgent oxygen', 'oxygen help']
 
+SEARCH_BY_HASHTAG = {
+    'bed': 'bed',
+    'oxygen': 'oxygen',
+    'ventilator': 'ventilator'
+}
+
 VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
 TEMPLATES_PATH = os.environ.get("EDA_TEMPLATES_PATH", os.path.join(os.sep, BASE_PATH, "templates"))
