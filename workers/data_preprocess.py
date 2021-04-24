@@ -50,10 +50,9 @@ class GraphDataFormatter:
         current_stats = dict(self.state_wise_total_df.iloc[0])
         current_vaccine_administered = list(self.vaccine_state_total_df.iloc[-1])[-1]
         current_stats.update({"Vaccine Administered": current_vaccine_administered})
-        return {
-            "state": "Total",
-            "data": [current_stats]
-        }
+        for not_needed_col in ['State', 'Migrated_Other', 'State_code']:
+            current_stats.pop(not_needed_col)
+        return current_stats
 
     def get_time_series_data(self):
         total_cases_df = self.time_series_df[['Date', 'Date_YMD', 'Total Confirmed', 'Total Recovered', 'Total Deceased']]

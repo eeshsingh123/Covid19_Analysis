@@ -26,8 +26,8 @@ VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGE
 TEMPLATES_PATH = os.environ.get("EDA_TEMPLATES_PATH", os.path.join(os.sep, BASE_PATH, "templates"))
 STATIC_PATH = os.environ.get("EDA_STATIC_PATH", os.path.join(os.sep, BASE_PATH, "static"))
 
-FLASK_HOST = os.environ.get('FLASK_HOST', '0.0.0.0')
-FLASK_PORT = os.environ.get('FLASK_PORT', '7916')
+FLASK_HOST = os.environ.get('FLASK_HOST', "127.0.0.1")
+FLASK_PORT = os.environ.get('FLASK_PORT', 7916)
 
 MONGO_DB = {
     "host": "localhost",

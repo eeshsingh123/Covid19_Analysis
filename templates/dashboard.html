@@ -1,0 +1,39 @@
+{% extends "generic.html" %}
+
+{% block daily_data %}
+
+    <p class="text-center text-muted">Last Updated: {{daily_data['Last_Updated_Time']}}</p>
+
+    <div class="container px-4">
+        <div class="row gx-1">
+            <div class="card bg-dark text-white m-1" style="width: 20rem;">
+                <div class="card-body">
+                    <h3 class="card-title text-center justify-content-center">Active</h3>
+                    <h6  class="card-text text-center">{{"{:,}".format(daily_data['Active'])}}</h6>
+                </div>
+            </div>
+
+            {% for itr in ['Confirmed', 'Recovered', 'Deaths']%}
+                <div class="card bg-dark text-white m-1" style="width: 19rem;">
+                    <div class="card-body">
+                        <h3 class="card-title text-center justify-content-center">{{itr}}</h3>
+                        <h6 class="card-text text-center">{{"{:,}".format(daily_data[itr])}}</h6>
+                        <p class="card-text text-center text-success">
+                            <i class="bi-plus"></i>
+                            {{"{:,}".format(daily_data['Delta_' + itr])}}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="container mb-2">
+        <div class=" p-3 mb-2 bg-success text-white text-center">Vaccine Administered: {{"{:,}".format(daily_data['Vaccine Administered'])}}</div>
+    </div>
+
+
+
+
+
+{% endblock daily_data %}
