@@ -3,6 +3,7 @@ import time
 import tweepy
 from tweepy import OAuthHandler
 from pymongo import InsertOne, MongoClient
+import pandas as pd
 
 from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from config import MONGO_URL, DB_NAME, SEARCH_BY_HASHTAG
@@ -71,6 +72,23 @@ def get_single_user_tweets(user_id=None, hashtag=None, print_test=False, count=1
         return True
 
 
+def drop_collections_mongo(collections_list):
+    for col in collections_list:
+        deleted_c = mongo[col].delete_many({})
+        mongo[col].drop()
+        print(deleted_c.deleted_count)
+
+
+def check_mongo_collection_data(collection_name):
+    # db_data = list(mongo[collection_name].find({"category": {"$nin": ["General"]}}))
+    df = pd.DataFrame(list(mongo['twitter_stream_data'].aggregate([
+        {"$sort": {"timestamp_ms": -1}},
+        {"$limit": 2000},
+        {"$match": {"category": {"$nin": ["General"]}}}])))
+    df.to_csv("C:\\Users\\eeshs\\Desktop\\test.csv")
+    return df
+
+
 def de_emojify(text):
     if text:
         return text.encode('ascii', 'ignore').decode('ascii')
@@ -80,4 +98,9 @@ def de_emojify(text):
 
 if __name__ == "__main__":
     # get_single_user_tweets(user_id='@covid19indiaorg')
-    get_single_user_tweets(hashtag="bed")
+    # get_single_user_tweets(hashtag="bed")
+
+    # col_list = ['twitter_bed_data', 'twitter_covid_data', 'twitter_oxygen_data', 'twitter_stream_data', 'twitter_ventilator_data']
+    drop_collections_mongo(['twitter_stream_data'])
+
+    # check_mongo_collection_data('twitter_stream_data')

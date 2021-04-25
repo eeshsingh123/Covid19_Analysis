@@ -31,10 +31,10 @@ class Listener(StreamListener):
 
     def __init__(self, api=None):
         super().__init__(api=None)
-        self.covid_data_list, self.bed_data_list, self.ventilator_data_list, self.oxygen_data_list = [], [], [], []
+        self.covid_data_list = []
         self.value_list = []
-        self.thresh = 50
-        self.trending_thresh = 500
+        self.thresh = 5
+        self.trending_thresh = 100
         self.counter, self.trending_counter = 0, 0
 
     def on_connect(self):
@@ -100,40 +100,35 @@ class Listener(StreamListener):
 
             # Tweet filtering Logic
             temp_tweet_text = tweet_data.lower()
-            if any([word in temp_tweet_text for word in COVID_TRACK_WORDS]):
-                self.covid_data_list.append(InsertOne(data_to_insert))
+            category = []
             if any([word in temp_tweet_text for word in BED_TRACK_WORDS]):
-                self.bed_data_list.append(InsertOne(data_to_insert))
+                category.append('Beds')
             if any([word in temp_tweet_text for word in VENTILATOR_TRACK_WORDS]):
-                self.ventilator_data_list.append(InsertOne(data_to_insert))
+                category.append("Ventilators")
             if any([word in temp_tweet_text for word in OXYGEN_TRACK_WORDS]):
-                self.oxygen_data_list.append(InsertOne(data_to_insert))
+                category.append('Oxygen')
+            if not category:
+                if any([word in temp_tweet_text for word in COVID_TRACK_WORDS]):
+                    category.append('Covid Info')
 
-            self.value_list.append(InsertOne(data_to_insert))
-            self.counter += 1
-            self.trending_counter += 1
+            if category:
+                data_to_insert.update({'category': category})
+                self.value_list.append(InsertOne(data_to_insert))
+                self.counter += 1
+                self.trending_counter += 1
 
-            # Insert all the entries into mongoDB
-            if self.counter % self.thresh == 0:
-                print("===============Thresh satisfied: Inserting into Mongo DB=====================")
-                if self.value_list:
-                    mongo['twitter_stream_data'].bulk_write(self.value_list)
-                if self.covid_data_list:
-                    mongo['twitter_covid_data'].bulk_write(self.covid_data_list)
-                if self.bed_data_list:
-                    mongo['twitter_bed_data'].bulk_write(self.bed_data_list)
-                if self.ventilator_data_list:
-                    mongo['twitter_ventilator_data'].bulk_write(self.ventilator_data_list)
-                if self.oxygen_data_list:
-                    mongo['twitter_oxygen_data'].bulk_write(self.oxygen_data_list)
-                self.counter = 0
-                self.covid_data_list, self.bed_data_list, self.ventilator_data_list, self.oxygen_data_list = [], [], [], []
-                self.value_list = []
+                # Insert all the entries into mongoDB
+                if self.counter % self.thresh == 0:
+                    print("===============Thresh satisfied: Inserting into Mongo DB=====================")
+                    if self.value_list:
+                        mongo['twitter_stream_data'].bulk_write(self.value_list)
+                    self.counter = 0
+                    self.value_list = []
 
-                # Trending data generation after 500 entries
-                if self.trending_counter % self.trending_thresh == 0:
-                    generate_trending()
-                    self.trending_counter = 0
+                    # Trending data generation after 500 entries
+                    if self.trending_counter % self.trending_thresh == 0:
+                        generate_trending()
+                        self.trending_counter = 0
 
         except Exception as e:
             traceback.print_exc()
@@ -143,7 +138,6 @@ class Listener(StreamListener):
 
     def on_error(self, status_code):
         print(f"Encountered streaming error: {status_code}")
-        self.covid_data_list, self.bed_data_list, self.ventilator_data_list, self.oxygen_data_list = [], [], [], []
         self.value_list = []
 
 
@@ -154,9 +148,11 @@ def generate_trending():
         mongo['trending_data'].remove(deletion_logic)
 
         df = pd.DataFrame(list(mongo['twitter_stream_data'].aggregate([
-            {"$sort": {"timestamp_ms": -1}}, {"$limit": 2000}])))
+            {"$sort": {"timestamp_ms": -1}},
+            {"$limit": 2000},
+            {"$match": {"category": {"$nin": ["General"]}}}])))
 
-        df['nouns'] = df['tweet'].apply(lambda x: [word[0] for word in TextBlob(x).tags if word[1] == u'NNP'])
+        df['nouns'] = df['tweet_data'].apply(lambda x: [word[0] for word in TextBlob(x).tags if word[1] == u'NNP'])
         tokens = split_regex.split(' '.join(list(itertools.chain.from_iterable(df['nouns'].values.tolist()))).lower())
         trending = (Counter(tokens) - bad_words).most_common(10)
 

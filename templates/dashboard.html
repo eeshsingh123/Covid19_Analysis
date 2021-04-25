@@ -52,8 +52,56 @@
             <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
 
         </div>
+    </div><br>
+
+{% endblock time_series_data %}
+
+{% block twitter_data %}
+    <div class="container px-9">
+        <div class="row gx-1">
+            <section class="content">
+			    <h1 class="text-white">Live Twitter Data</h1>
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="pull-right">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="General">General</button>
+                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="Beds">Beds</button>
+                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="Oxygen">Oxygen</button>
+                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="Venitlator">Venitlator</button>
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table class="table table-filter">
+                                        <tbody>
+                                            {% for twitter_data in covid_twitter_data %}
+                                                {% set tweet_category = twitter_data['category'][0] if twitter_data['category']|length == 1 else twitter_data['category']| random %}
+                                                <tr data-status="{{tweet_category}}">
+                                                    <td>
+                                                        <div class="media">
+                                                            <div class="media-body">
+                                                                <span class="media-meta pull-right">{{twitter_data['created_at']}}</span>
+                                                                <h4 class="title text-white">
+                                                                    {{twitter_data['user_location'] or 'India'}}
+                                                                    <span class="pull-right generic {{tweet_category}}"> ({{", ".join(twitter_data['category'])}})</span>
+                                                                </h4>
+                                                                <p class="summary text-white">{{twitter_data['tweet_data']}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+		    </section>
+        </div>
     </div>
 
 
-{% endblock time_series_data %}
+{% endblock twitter_data %}
 

@@ -1,6 +1,7 @@
 import os
 import random
 
+import pymongo
 from flask import Flask, jsonify, request, render_template, url_for
 from flask_pymongo import PyMongo
 from pymongo import InsertOne
@@ -14,7 +15,7 @@ app.config['MONGO_URI'] = MONGO_URL
 mongo = PyMongo(app)
 
 try:
-    mongo.db.covid_data.count_documents({"x": 1})
+    mongo.db.twitter_covid_data.count_documents({"x": 1})
     print("Database is Working")
 except Exception as ee:
     print("Database not working, Error: ", ee)
@@ -29,7 +30,7 @@ print("*-------------------APP IS READY------------------------*")
 def test():
     results = ["Flask app is ready to use"]
     try:
-        mongo.db.covid_data.count_documents({"x": 1})
+        mongo.db.twitter_covid_data.count_documents({"x": 1})
         results.append("Database connection is working")
     except Exception as e:
         results.append(f"Database connection not working, Error: {e}")
@@ -42,8 +43,11 @@ def home():
     daily_result = graph_data_formatter.get_current_days_data()
     time_series_total, time_series_daily = graph_data_formatter.get_time_series_data()
 
+    covid_twitter_data = list(mongo.db.twitter_stream_data.find({}).sort('code', pymongo.DESCENDING).limit(20))
+
     assert time_series_total, "Time series (Total) data not obtained from `data_preprocess.py`"
     assert time_series_daily, "Time series (Daily) data not obtained from `data_preprocess.py`"
+    assert covid_twitter_data, "twitter data not available in MongoDB"
     # Formatting it according to Chart js. (can be formatted according to any other graph libs here..)
 
     time_series_total_formatted = {
@@ -71,7 +75,8 @@ def home():
         title='Dashboard',
         daily_data=daily_result,
         time_series_total=time_series_total_formatted,
-        time_series_daily=time_series_daily_formatted
+        time_series_daily=time_series_daily_formatted,
+        covid_twitter_data=covid_twitter_data,
     )
 
 

@@ -7,21 +7,21 @@ BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH", os.path.join(os.sep, 'Projects
 if not os.path.isdir(BASE_PATH):
     os.mkdir(BASE_DATA_PATH)
 
-COVID_TRACK_WORDS = ['corona', 'covid19', 'covid-19', 'pandemic', 'virus', 'vaccine', 'vaccination']
+COVID_TRACK_WORDS = ['corona', 'covid19', 'covid-19', 'pandemic', 'virus', 'vaccine', 'vaccination', 'remdesivir injection', 'remdesivir']
 
 BED_TRACK_WORDS = ['bed', 'beds', 'hospital bed', 'urgent bed', 'hospitals', 'bed shortage',
-                   'bed needed', 'beds needed', 'bed help', 'need bed', 'need beds']
+                   'bed needed', 'beds needed', 'bed help', 'need bed', 'need beds', 'icu beds']
 
 OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', 'help oxygen', 'oxygen shortage',
                       'hospital oxygen', 'urgent oxygen', 'oxygen help']
+
+VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
 SEARCH_BY_HASHTAG = {
     'bed': 'bed',
     'oxygen': 'oxygen',
     'ventilator': 'ventilator'
 }
-
-VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
 TEMPLATES_PATH = os.environ.get("EDA_TEMPLATES_PATH", os.path.join(os.sep, BASE_PATH, "templates"))
 STATIC_PATH = os.environ.get("EDA_STATIC_PATH", os.path.join(os.sep, BASE_PATH, "static"))
@@ -124,7 +124,7 @@ COLOR_LIST = ['#6a2c70', '#b83b5e', '#f08a5d', '#056674', '#16213e', '#1a1a2e', 
 
 COLOR_DICT = {
     "Confirmed": "#B22222",
-    "Deceased": "#696969",
+    "Deceased": "#9884b5",
     "Recovered": "#00FF7F",
     "Other": "#E6E6FA"
 }
