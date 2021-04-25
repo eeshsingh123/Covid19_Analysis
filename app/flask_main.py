@@ -1,10 +1,11 @@
 import os
+import random
 
 from flask import Flask, jsonify, request, render_template, url_for
 from flask_pymongo import PyMongo
 from pymongo import InsertOne
 
-from config import FLASK_HOST, FLASK_PORT, MONGO_URL, PATHS, TEMPLATES_PATH, STATIC_PATH
+from config import FLASK_HOST, FLASK_PORT, MONGO_URL, PATHS, TEMPLATES_PATH, STATIC_PATH, COLOR_LIST ,COLOR_DICT
 from workers.data_preprocess import GraphDataFormatter
 from workers.twitter_operations import TwitterHandler
 
@@ -41,14 +42,38 @@ def home():
     daily_result = graph_data_formatter.get_current_days_data()
     time_series_total, time_series_daily = graph_data_formatter.get_time_series_data()
 
+    assert time_series_total, "Time series (Total) data not obtained from `data_preprocess.py`"
+    assert time_series_daily, "Time series (Daily) data not obtained from `data_preprocess.py`"
+    # Formatting it according to Chart js. (can be formatted according to any other graph libs here..)
+
+    time_series_total_formatted = {
+        "labels": time_series_total['data'][0]['x'],
+        "datasets": [
+            {"data": i["y"], "label": i["name"],
+             "borderColor": COLOR_DICT.get(i["name"].split()[1], COLOR_DICT["Other"]),
+             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 0.8}
+            for i in time_series_total["data"]
+        ]
+    }
+
+    time_series_daily_formatted = {
+        "labels": time_series_daily['data'][0]['x'],
+        "datasets": [
+            {"data": j["y"], "label": j["name"],
+             "borderColor": COLOR_DICT.get(j["name"].split()[1], COLOR_DICT["Other"]),
+             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 0.8}
+            for j in time_series_daily["data"]
+        ]
+    }
+
     return render_template(
         'dashboard.html',
         title='Dashboard',
         daily_data=daily_result,
-        time_series_total=time_series_total,
-        time_series_daily=time_series_daily
+        time_series_total=time_series_total_formatted,
+        time_series_daily=time_series_daily_formatted
     )
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=FLASK_PORT, use_reloader=False)
+    app.run(debug=True, host=FLASK_HOST, port=FLASK_PORT, use_reloader=False)

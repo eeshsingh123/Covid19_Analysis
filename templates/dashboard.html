@@ -32,8 +32,28 @@
         <div class=" p-3 mb-2 bg-success text-white text-center">Vaccine Administered: {{"{:,}".format(daily_data['Vaccine Administered'])}}</div>
     </div>
 
-
-
-
-
 {% endblock daily_data %}
+
+{% block time_series_data %}
+    <div class="container">
+        <div class="row gx-1">
+            <canvas id="time-series-total" width="600px" height="400px"></canvas>
+            <script type="text/javascript">
+                var chart_id = "time-series-total"
+                var total_line_data = {{ time_series_total|tojson }}
+            </script>
+            <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
+
+            <canvas id="time-series-daily" width="600px" height="400px"></canvas>
+            <script type="text/javascript">
+                var chart_id = "time-series-daily"
+                var total_line_data = {{ time_series_daily|tojson }}
+            </script>
+            <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
+
+        </div>
+    </div>
+
+
+{% endblock time_series_data %}
+
