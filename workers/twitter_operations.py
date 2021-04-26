@@ -1,8 +1,11 @@
 import time
+import json
+import random
 
 import tweepy
 from tweepy import OAuthHandler
 from pymongo import InsertOne, MongoClient
+from tqdm import tqdm
 
 from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from config import MONGO_URL, DB_NAME, SEARCH_BY_HASHTAG
@@ -18,42 +21,61 @@ class TwitterHandler:
 
     def get_user_timeline(self, user_id: str, count: int):
         data_to_insert = []
-        tweets = self.api.user_timeline(
+        tweets = []
+        tweets_obj = self.api.user_timeline(
             screen_name=user_id,
             include_rts=False,
             tweet_mode='extended',
             exclude_replies=True,
             count=count
         )
+        for tweet_data in tweets_obj:
+            d = json.loads(json.dumps(tweet_data._json))
+            tweets.append(d)
 
         for t_, tweet_text in enumerate(tweets):
             tweet_dict = {
-                "name": tweet_text.user.get('name', user_id),
+                "name": tweet_text['user'].get('name', user_id),
                 "mined_at": int(time.time()),
-                "created_at": tweet_text.created_at,
-                "text": tweet_text.full_text,
-                "retweet_count": tweet_text.retweet_count,
-                "favourite_count": tweet_text.favourite_count,
-                "hashtags": tweet_text.entities.get("hashtags", []),
-                "source": tweet_text.source
+                "created_at": tweet_text['created_at'],
+                "text": tweet_text['full_text'],
+                "retweet_count": tweet_text['retweet_count'],
+                "favorite_count": tweet_text.get('favorite_count', 0),
+                "hashtags": tweet_text['entities'].get("hashtags", []),
+                "source": tweet_text['source']
             }
             data_to_insert.append(InsertOne(tweet_dict))
 
         mongo['user_timeline_data'].bulk_write(data_to_insert)
         return True
 
-    def get_tweets_from_hashtag(self, hashtag: str, count: int):
+    def get_tweets_from_hashtag(self, hashtag: list, count: int, agg_type: str):
         place = self.api.geo_search(query="India", granularity="country")
         place_id = place[0].id
         data_to_insert = []
 
-        for tweet in tweepy.Cursor(self.api.search, q=f"place:{place_id} #{SEARCH_BY_HASHTAG[hashtag]}").items(count):
+        for tweet in tweepy.Cursor(self.api.search, q=f"place:{place_id} {f' {agg_type} '.join(hashtag)}").items(count):
             hashtag_tweet_dict = {
                 "mined_at": int(time.time()),
                 "text": tweet.text,
-                "created_at": tweet.created_at
+                "created_at": tweet.created_at,
+                "category": hashtag,
+                "agg_by": agg_type
             }
             data_to_insert.append(InsertOne(hashtag_tweet_dict))
 
         mongo['hashtag_specific_data'].bulk_write(data_to_insert)
         return True
+
+
+if __name__ == "__main__":
+    t = TwitterHandler()
+    # print(t.get_user_timeline(user_id="@covid19indiaorg", count=20))
+
+    for _ in tqdm(range(50)):
+        x = random.choice(['#Help', '#Help', '#Urgent', '#urgent'])
+        y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
+
+        t.get_tweets_from_hashtag(hashtag=[x, y], count=150, agg_type=random.choice(['OR', 'AND']))
+
+    # print(t.get_tweets_from_hashtag(hashtag=["#Beds", "#Urgent", "#Help", "#Oxygen", "#Remdesivir", "#Ventilator"], count=200, agg_type="OR"))

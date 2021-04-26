@@ -55,7 +55,7 @@ def home():
         "datasets": [
             {"data": i["y"], "label": i["name"],
              "borderColor": COLOR_DICT.get(i["name"].split()[1], COLOR_DICT["Other"]),
-             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 0.8}
+             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 1}
             for i in time_series_total["data"]
         ]
     }
@@ -65,7 +65,7 @@ def home():
         "datasets": [
             {"data": j["y"], "label": j["name"],
              "borderColor": COLOR_DICT.get(j["name"].split()[1], COLOR_DICT["Other"]),
-             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 0.8}
+             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 1}
             for j in time_series_daily["data"]
         ]
     }

@@ -8,6 +8,7 @@ body {
 
 .btn-custom {
     background-color: #60586e !important;
+    margin-right: 10px !important;
 }
 
 table {
