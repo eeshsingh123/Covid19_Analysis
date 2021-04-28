@@ -8,7 +8,7 @@ from pymongo import InsertOne, MongoClient
 from tqdm import tqdm
 
 from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-from config import MONGO_URL, DB_NAME, SEARCH_BY_HASHTAG
+from config import MONGO_URL, DB_NAME
 
 mongo = MongoClient(MONGO_URL)[DB_NAME]
 
@@ -34,15 +34,17 @@ class TwitterHandler:
             tweets.append(d)
 
         for t_, tweet_text in enumerate(tweets):
+            hashtags = tweet_text['entities'].get("hashtags", [])
+            if hashtags:
+                hashtags = [h['text'] for h in tweet_text['entities'].get("hashtags", [])]
+
+            print(hashtags)
             tweet_dict = {
                 "name": tweet_text['user'].get('name', user_id),
                 "mined_at": int(time.time()),
                 "created_at": tweet_text['created_at'],
                 "text": tweet_text['full_text'],
-                "retweet_count": tweet_text['retweet_count'],
-                "favorite_count": tweet_text.get('favorite_count', 0),
-                "hashtags": tweet_text['entities'].get("hashtags", []),
-                "source": tweet_text['source']
+                "hashtags": hashtags
             }
             data_to_insert.append(InsertOne(tweet_dict))
 
@@ -50,32 +52,42 @@ class TwitterHandler:
         return True
 
     def get_tweets_from_hashtag(self, hashtag: list, count: int, agg_type: str):
-        place = self.api.geo_search(query="India", granularity="country")
-        place_id = place[0].id
-        data_to_insert = []
+        try:
+            place = self.api.geo_search(query="India", granularity="country")
+            place_id = place[0].id
+            data_to_insert = []
 
-        for tweet in tweepy.Cursor(self.api.search, q=f"place:{place_id} {f' {agg_type} '.join(hashtag)}").items(count):
-            hashtag_tweet_dict = {
-                "mined_at": int(time.time()),
-                "text": tweet.text,
-                "created_at": tweet.created_at,
-                "category": hashtag,
-                "agg_by": agg_type
-            }
-            data_to_insert.append(InsertOne(hashtag_tweet_dict))
+            for tweet in tweepy.Cursor(self.api.search, q=f"place:{place_id} {f' {agg_type} '.join(hashtag)}").items(count):
+                hashtag_tweet_dict = {
+                    "mined_at": int(time.time()),
+                    "text": tweet.text,
+                    "created_at": tweet.created_at,
+                    "user_location": tweet.user.location,
+                    "category": hashtag,
+                    "agg_by": agg_type
+                }
+                data_to_insert.append(InsertOne(hashtag_tweet_dict))
 
-        mongo['hashtag_specific_data'].bulk_write(data_to_insert)
-        return True
+            mongo['hashtag_specific_data'].bulk_write(data_to_insert)
+            return True
+        except Exception as e:
+            print(str(e))
+            pass
 
 
 if __name__ == "__main__":
     t = TwitterHandler()
+    from config import TRACKED_USERS
+
+    for u in TRACKED_USERS:
+        t.get_user_timeline(user_id=u, count=20)
+
     # print(t.get_user_timeline(user_id="@covid19indiaorg", count=20))
 
-    for _ in tqdm(range(50)):
-        x = random.choice(['#Help', '#Help', '#Urgent', '#urgent'])
-        y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
-
-        t.get_tweets_from_hashtag(hashtag=[x, y], count=150, agg_type=random.choice(['OR', 'AND']))
+    # for _ in tqdm(range(20)):
+    #     x = random.choice(['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"])
+    #     y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
+    #
+    #     t.get_tweets_from_hashtag(hashtag=[x, y], count=20, agg_type=random.choice(['OR', 'AND']))
 
     # print(t.get_tweets_from_hashtag(hashtag=["#Beds", "#Urgent", "#Help", "#Oxygen", "#Remdesivir", "#Ventilator"], count=200, agg_type="OR"))

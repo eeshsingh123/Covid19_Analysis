@@ -60,20 +60,20 @@
     <div class="container">
         <div class="row gx-1">
             <section class="content">
-			    <h1 class="text-white">Live Twitter Data</h1>
-                    <div class="col-md-8 col-md-offset-2">
+			    <h1 class="text-white text-center">Live Twitter Data</h1>
+                    <div class="col-md-18 col-md-offset-2">
                         <div class="panel panel-default">
                             <div class="panel-body">
                                 <div class="pull-right">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="Covid Info">General</button>
-                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="Beds">Beds</button>
-                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="Oxygen">Oxygen</button>
-                                        <button type="button" class="btn btn-custom btn-filter text-white" data-target="Venitlator">Venitlator</button>
+                                        <button type="button" class="btn btn-custom btn-tweet-filter text-white" data-target="Covid Info">General</button>
+                                        <button type="button" class="btn btn-custom btn-tweet-filter text-white" data-target="Beds">Beds</button>
+                                        <button type="button" class="btn btn-custom btn-tweet-filter text-white" data-target="Oxygen">Oxygen</button>
+                                        <button type="button" class="btn btn-custom btn-tweet-filter text-white" data-target="Venitlator">Venitlator</button>
                                     </div>
                                 </div>
                                 <div class="table-container">
-                                    <table class="table table-filter">
+                                    <table class="table table-tweet table-filter">
                                         <tbody>
                                             {% for twitter_data in covid_twitter_data %}
                                                 {% set tweet_category = twitter_data['category'][0] if twitter_data['category']|length == 1 else twitter_data['category']| random %}
@@ -99,6 +99,88 @@
                         </div>
                     </div>
 		    </section>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row gx-1">
+            <section class="content"><br>
+			    <h1 class="text-white text-center">Live Hashtag Tracker</h1>
+                    <div class="col-md-18 col-md-offset-2">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="pull-right">
+                                    <div class="btn-group">
+                                        <script> var btn_id = "btn-hashtag-filter"</script>
+                                        {% for h_tag in ["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"] %}
+                                            <button type="button" class="btn btn-custom btn-hashtag-filter text-white" data-target="{{h_tag}}">{{h_tag}}</button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table class="table table-htag table-filter">
+                                        <tbody>
+                                            {% for hashtag_data in hashtag_twitter_data %}
+                                                {% set hashtag_category = hashtag_data['category'][0] if hashtag_data['category']|length == 1 else hashtag_data['category'][1] %}
+                                                <tr data-status="{{hashtag_category}}">
+                                                    <td>
+                                                        <div class="media">
+                                                            <div class="media-body">
+                                                                <span class="media-meta pull-right">{{hashtag_data['created_at']}}</span>
+                                                                <h4 class="title text-white">
+                                                                    {{hashtag_data['user_location'] or 'India'}}
+                                                                    <span class="pull-right generic {{hashtag_category}}"> ({{", ".join(hashtag_data['category'])}})</span>
+                                                                </h4>
+                                                                <p class="summary text-white">{{hashtag_data['text']}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+		    </section>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row gx-1">
+            <h1 class="text-white text-center">Important User Tracker</h1>
+            {% for user, user_data_list in user_specific_data.items() %}
+                <div class="col-md-4 col-md-offset-2">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="table-container">
+                                <h4 class="text-white text-center">{{user}}</h4>
+                                <table class="table table-imp table-filter">
+                                    <tbody>
+                                        {% for user_d in user_data_list %}
+                                            <tr data-status="user-specific-{{loop.index}}">
+                                                <td>
+                                                    <div class="media">
+                                                        <div class="media-body">
+                                                            <span class="media-meta pull-right">{{user_d['created_at']}}</span>
+                                                            <h4 class="title text-white">
+                                                                {{user_d['user_location'] or 'India'}}
+                                                                <span class="pull-right generic"> {{", #".join(user_d['hashtags'])}}</span>
+                                                            </h4>
+                                                            <p class="summary text-white">{{user_d['text']}}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
 

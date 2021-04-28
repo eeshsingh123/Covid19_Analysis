@@ -17,6 +17,8 @@ OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', '
 
 VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
+TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI"]
+
 SEARCH_BY_HASHTAG = {
     'bed': 'bed',
     'oxygen': 'oxygen',

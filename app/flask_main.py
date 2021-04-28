@@ -1,12 +1,8 @@
-import os
-import random
-
 import pymongo
 from flask import Flask, jsonify, request, render_template, url_for
 from flask_pymongo import PyMongo
-from pymongo import InsertOne
 
-from config import FLASK_HOST, FLASK_PORT, MONGO_URL, PATHS, TEMPLATES_PATH, STATIC_PATH, COLOR_LIST ,COLOR_DICT
+from config import FLASK_HOST, FLASK_PORT, MONGO_URL, TEMPLATES_PATH, STATIC_PATH, COLOR_DICT, TRACKED_USERS
 from workers.data_preprocess import GraphDataFormatter
 from workers.twitter_operations import TwitterHandler
 
@@ -43,12 +39,35 @@ def home():
     daily_result = graph_data_formatter.get_current_days_data()
     time_series_total, time_series_daily = graph_data_formatter.get_time_series_data()
 
-    covid_twitter_data = list(mongo.db.twitter_stream_data.find({}).sort('code', pymongo.DESCENDING).limit(20))
+    covid_twitter_data = list(mongo.db.twitter_stream_data.find({}).sort('code', pymongo.DESCENDING).limit(100))
+    hashtag_twitter_data = list(mongo.db.hashtag_specific_data.find({}).sort('mined_at', pymongo.DESCENDING).limit(100))
+    user_specific_data = list(mongo.db.user_timeline_data.find({}).sort('mined_at', pymongo.DESCENDING))
 
     assert time_series_total, "Time series (Total) data not obtained from `data_preprocess.py`"
     assert time_series_daily, "Time series (Daily) data not obtained from `data_preprocess.py`"
     assert covid_twitter_data, "twitter data not available in MongoDB"
+    assert hashtag_twitter_data, "hashtag data not available in MongoDB"
+    assert user_specific_data, "user data not available in MongoDB"
     # Formatting it according to Chart js. (can be formatted according to any other graph libs here..)
+
+    # user timeline data formatting
+    tracked_users_dict = {}
+    for user_data in user_specific_data:
+
+        user_data['hashtags'] = [i['text'] for i in user_data['hashtags']]
+
+        if user_data['name'] not in tracked_users_dict:
+            tracked_users_dict[user_data['name']] = [{
+                "created_at": user_data['created_at'],
+                "text": user_data['text'],
+                "hashtags": user_data['hashtags']
+            }]
+        else:
+            tracked_users_dict[user_data['name']].append({
+                "created_at": user_data['created_at'],
+                "text": user_data['text'],
+                "hashtags": user_data['hashtags']
+            })
 
     time_series_total_formatted = {
         "labels": time_series_total['data'][0]['x'],
@@ -70,6 +89,7 @@ def home():
         ]
     }
 
+    # Todo: Add all important users in a dict and save their name as key and data as value
     return render_template(
         'dashboard.html',
         title='Dashboard',
@@ -77,6 +97,8 @@ def home():
         time_series_total=time_series_total_formatted,
         time_series_daily=time_series_daily_formatted,
         covid_twitter_data=covid_twitter_data,
+        hashtag_twitter_data=hashtag_twitter_data,
+        user_specific_data=tracked_users_dict
     )
 
 
