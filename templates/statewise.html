@@ -1,0 +1,106 @@
+{% extends "generic.html" %}
+
+{%block side_navigation_bar %}
+    <div class="collapse" id="navbarToggleExternalContent">
+        <div class="bg-dark p-4">
+            <h5 class="text-white h4">State-wise Data Analysis</h5>
+            {% for state_name in state_list %}
+                <div class="btn-group mb-2" role="group" aria-label="State button group">
+                    <button type="button" class="btn btn-primary btn-sm active" onclick="window.location.href='{{url_for('state_analysis', state=state_name)}}'">{{state_name}}</button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+{% endblock%}
+
+{% block daily_data %}
+
+    <p class="text-center text-muted">State: {{daily_data['state']}}</p>
+    <div class="container px-4">
+        <div class="row gx-1">
+            <button type="button" class="btn btn-primary btn-md" onclick="window.location.href='{{url_for('home')}}'">Home Page</button>
+            <div class="card bg-dark text-white m-1" style="width: 20rem;">
+                <div class="card-body">
+                    <h3 class="card-title text-center justify-content-center">Active</h3>
+                    <h6  class="card-text text-center">{{"{:,}".format(daily_data['data']['Active'])}}</h6>
+                </div>
+            </div>
+
+            {% for itr in ['Confirmed', 'Recovered', 'Deaths']%}
+                <div class="card bg-dark text-white m-1" style="width: 19rem;">
+                    <div class="card-body">
+                        <h3 class="card-title text-center justify-content-center">{{itr}}</h3>
+                        <h6 class="card-text text-center">{{"{:,}".format(daily_data['data'][itr])}}</h6>
+                        <p class="card-text text-center text-success">
+                            <i class="bi-plus"></i>
+                            {{"{:,}".format(daily_data['data']['Delta_' + itr])}}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock daily_data %}
+
+{% block time_series_data%}
+
+    <div class="container">
+        <div class="row gx-1">
+
+            {% for state_g in state_daily %}
+                <canvas id="state-wise-{{state_g['chart_id']}}" width="600px" height="400px"></canvas>
+                <script type="text/javascript">
+                    var chart_id = "state-wise-{{state_g['chart_id']}}"
+                    var total_line_data = {{ state_g['chart_data']|tojson }}
+                    var title_text = "{{state_g['chart_id']}} Distribution of Cases in {{current_state}}"
+                </script>
+                <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
+
+            {% endfor %}
+        </div>
+    </div><br>
+
+{% endblock time_series_data%}
+
+{% block vaccine_distribution_data %}
+
+    <h1 class="text-white text-center">Vaccine Distribution Analysis</h1>
+
+    <div class="container">
+        <div class="row gx-1">
+            {% for vac_graph in vaccine_data %}
+                <canvas id="{{vac_graph['chart_id']}}" width="600px" height="400px"></canvas>
+                <script type="text/javascript">
+                    var chart_id = "{{ vac_graph['chart_id'] }}"
+                    var total_line_data = {{ vac_graph['chart_data']|tojson }}
+                    var title_text = "{{vac_graph['chart_name']}}"
+                </script>
+                <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
+
+            {% endfor %}
+
+            <h1 class="text-white text-center">Average Distribution Of Vaccine</h1><br>
+
+            {% for k, v in vaccine_agg.items() %}
+                <div class="card text-white bg-danger m-1" style="max-width: 18rem;">
+                    <div class="card-header">Facts</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Average {{k}}</h5>
+                        <p class="card-text">{{v['mean']|float|round}}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+{% endblock vaccine_distribution_data %}

@@ -6,9 +6,12 @@ var lineChart = new Chart(ctx, {
     data: total_line_data,
     options:{
         responsive: false,
-        title: {
-        display: true,
-        text: 'Covid Data'
+        plugins:{
+            title: {
+            display: true,
+            text: title_text,
+            color: "white",
+            }
         }
     }
 })

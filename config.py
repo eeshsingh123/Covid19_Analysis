@@ -19,6 +19,9 @@ VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGE
 
 TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI"]
 
+STREAM_DATA_KEEP_DAYS = 3
+USER_HASHTAG_KEEP_DAYS = 5
+
 SEARCH_BY_HASHTAG = {
     'bed': 'bed',
     'oxygen': 'oxygen',
@@ -131,6 +134,57 @@ COLOR_DICT = {
     "Other": "#E6E6FA"
 }
 
+STATE_LIST = [
+ 'Maharashtra',
+ 'Kerala',
+ 'Karnataka',
+ 'Andhra Pradesh',
+ 'Tamil Nadu',
+ 'Delhi',
+ 'Uttar Pradesh',
+ 'West Bengal',
+ 'Odisha',
+ 'Rajasthan',
+ 'Chhattisgarh',
+ 'Telangana',
+ 'Haryana',
+ 'Gujarat',
+ 'Bihar',
+ 'Madhya Pradesh',
+ 'Assam',
+ 'Punjab',
+ 'Jammu and Kashmir',
+ 'Jharkhand',
+ 'Uttarakhand',
+ 'Himachal Pradesh',
+ 'Goa',
+ 'Puducherry',
+ 'Tripura',
+ 'Manipur',
+ 'Chandigarh',
+ 'Arunachal Pradesh',
+ 'Meghalaya',
+ 'Nagaland',
+ 'Ladakh',
+ 'Sikkim',
+ 'Andaman and Nicobar Islands',
+ 'Mizoram',
+ 'Dadra and Nagar Haveli and Daman and Diu',
+ 'Lakshadweep',
+ 'State Unassigned'
+]
+
+VACCINE_GRAPH_COLS = [
+       'Total Individuals Registered', 'First Dose Administered',
+       'Second Dose Administered', 'Male', 'Female', 'Transgender',
+       'Total Covaxin Administered', 'Total CoviShield Administered',
+       'Total Doses Administered', 'delta_total_individuals_registered',
+       'delta_first_dose_administered', 'delta_second_dose_administered',
+       'delta_male', 'delta_female', 'delta_transgender',
+       'delta_total_covaxin_administered',
+       'delta_total_covishield_administered',
+       'delta_total_doses_administered'
+]
 
 if __name__ == "__main__":
     print(TABLE_ATTRIBUTES["base"])

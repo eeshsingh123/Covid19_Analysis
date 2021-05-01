@@ -16,8 +16,8 @@ from textblob import TextBlob
 from pymongo import InsertOne, MongoClient
 
 from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-from config import STOP_WORDS, MONGO_URL, DB_NAME, COVID_TRACK_WORDS, BED_TRACK_WORDS, VENTILATOR_TRACK_WORDS,\
-    OXYGEN_TRACK_WORDS
+from config import STOP_WORDS, MONGO_URL, DB_NAME, COVID_TRACK_WORDS, BED_TRACK_WORDS, VENTILATOR_TRACK_WORDS, \
+    OXYGEN_TRACK_WORDS, STREAM_DATA_KEEP_DAYS
 from tools.twitter_utils import de_emojify
 
 bad_words = Counter(dict(zip(STOP_WORDS, [1000000]*len(STOP_WORDS))))
@@ -143,7 +143,7 @@ class Listener(StreamListener):
 
 def generate_trending():
     try:
-        deletion_logic = {"code": {"$lt": int(time.time()) - 86400*2}}  # 3 days old remove
+        deletion_logic = {"code": {"$lt": int(time.time()) - 86400 * STREAM_DATA_KEEP_DAYS}}  # 3 days old remove
         mongo['twitter_stream_data'].remove(deletion_logic)
         mongo['trending_data'].remove(deletion_logic)
 

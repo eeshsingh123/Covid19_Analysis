@@ -1,5 +1,26 @@
 {% extends "generic.html" %}
 
+{%block side_navigation_bar %}
+    <div class="collapse" id="navbarToggleExternalContent">
+        <div class="bg-dark p-4">
+            <h5 class="text-white h4">State-wise Data Analysis</h5>
+            {% for state_name in state_list %}
+                <div class="btn-group mb-2" role="group" aria-label="State button group">
+                    <button type="button" class="btn btn-primary btn-sm active" onclick="window.location.href='{{url_for('state_analysis', state=state_name)}}'">{{state_name}}</button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+{% endblock%}
+
 {% block daily_data %}
 
     <p class="text-center text-muted">Last Updated: {{daily_data['Last_Updated_Time']}}</p>
@@ -41,6 +62,7 @@
             <script type="text/javascript">
                 var chart_id = "time-series-total"
                 var total_line_data = {{ time_series_total|tojson }}
+                var title_text = "Total Cases"
             </script>
             <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
 
@@ -48,6 +70,7 @@
             <script type="text/javascript">
                 var chart_id = "time-series-daily"
                 var total_line_data = {{ time_series_daily|tojson }}
+                var title_text = "Daily Cases"
             </script>
             <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
 
@@ -186,4 +209,38 @@
 
 
 {% endblock twitter_data %}
+
+{% block vaccine_distribution_data %}
+
+    <h1 class="text-white text-center">Vaccine Distribution Analysis</h1>
+
+    <div class="container">
+        <div class="row gx-1">
+            {% for vac_graph in vaccine_data %}
+                <canvas id="{{vac_graph['chart_id']}}" width="600px" height="400px"></canvas>
+                <script type="text/javascript">
+                    var chart_id = "{{ vac_graph['chart_id'] }}"
+                    var total_line_data = {{ vac_graph['chart_data']|tojson }}
+                    var title_text = "{{vac_graph['chart_name']}}"
+                </script>
+                <script src="{{url_for('static', filename='js/line_chart.js')}}"></script>
+
+            {% endfor %}
+
+            <h1 class="text-white text-center">Average Distribution Of Vaccine</h1><br>
+
+            {% for k, v in vaccine_agg.items() %}
+                <div class="card text-white bg-danger m-1" style="max-width: 18rem;">
+                    <div class="card-header">Facts</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Average {{k}}</h5>
+                        <p class="card-text">{{v['mean']|float|round}}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+{% endblock vaccine_distribution_data %}
 

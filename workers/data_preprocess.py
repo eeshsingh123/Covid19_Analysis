@@ -43,6 +43,7 @@ class GraphDataFormatter:
         self.vaccine_state_df.fillna(0.0, axis=1, inplace=True)
 
         self.vaccine_state_total_df = pd.read_csv(self.path['vaccination']['state_total'])
+        self.vaccine_state_total_df.fillna(2832152, axis=1, inplace=True)
 
         print("All Dataframes Loaded Successfully!")
 
@@ -99,13 +100,11 @@ class GraphDataFormatter:
         }
         total = {
             "state": state,
-            "data": [
-                {
-                    column: col_val for column, col_dict in total_state_df.items() for idx, col_val in col_dict.items()
-                    if
-                    column != 'State'
-                }
-            ]
+            "data": {
+                column: col_val for column, col_dict in total_state_df.items() for idx, col_val in col_dict.items()
+                if
+                column != 'State'
+            }
         }
         del daily_state_df, total_state_df
         return total, daily
@@ -146,26 +145,23 @@ class GraphDataFormatter:
         return total, daily
 
     def get_vaccine_data(self, state):
+        vac_daily_df = self.vaccine_state_df[self.vaccine_state_df["State"] == state]
+        # Creating delta columns
+        for col in [vc for vc in vac_daily_df.columns if vc not in ['Updated On', 'State']]:
+            vac_daily_df[f'delta_{"_".join(col.split())}'.lower()] = vac_daily_df[col].diff()
+        vac_daily_df.fillna(0.0, axis=1, inplace=True)
 
-        vac_dict = self.vaccine_state_df[self.vaccine_state_df["State"] == state].to_dict()
+        vac_agg_data = vac_daily_df.describe().apply(lambda s: s.apply('{0:.5f}'.format)).to_dict()
+
+        vac_dict = vac_daily_df.to_dict()
         vac_data = {col_name: list(col_val.values()) for col_name, col_val in vac_dict.items()}
-
-        vac_total_data = dict(self.vaccine_state_total_df[self.vaccine_state_total_df['State'] == state].iloc[0])
 
         daily = {
             "state": state,
             "data": vac_data
         }
-        total = {
-            "state": state,
-            "data": [{
-                "state": vac_total_data.pop('State'),
-                "x": list(vac_total_data.keys()),
-                "y": list(vac_total_data.values()),
-            }]
-        }
-        del vac_data, vac_total_data
-        return total, daily
+        del vac_data
+        return daily, vac_agg_data
 
 
 if __name__ == "__main__":

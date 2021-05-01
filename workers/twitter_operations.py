@@ -8,7 +8,7 @@ from pymongo import InsertOne, MongoClient
 from tqdm import tqdm
 
 from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
-from config import MONGO_URL, DB_NAME
+from config import MONGO_URL, DB_NAME, USER_HASHTAG_KEEP_DAYS
 
 mongo = MongoClient(MONGO_URL)[DB_NAME]
 
@@ -18,6 +18,11 @@ class TwitterHandler:
         auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET_KEY)
         auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
         self.api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+
+        # delete records older than a day
+        deletion_logic = {"mined_at": {"$lt": int(time.time()) - 86400 * USER_HASHTAG_KEEP_DAYS}}
+        mongo['user_timeline_data'].remove(deletion_logic)
+        mongo['hashtag_specific_data'].remove(deletion_logic)
 
     def get_user_timeline(self, user_id: str, count: int):
         data_to_insert = []
@@ -44,7 +49,8 @@ class TwitterHandler:
                 "mined_at": int(time.time()),
                 "created_at": tweet_text['created_at'],
                 "text": tweet_text['full_text'],
-                "hashtags": hashtags
+                "hashtags": hashtags,
+                "source": tweet_text['source']
             }
             data_to_insert.append(InsertOne(tweet_dict))
 

@@ -1,8 +1,12 @@
+import random
+
 import pymongo
 from flask import Flask, jsonify, request, render_template, url_for
 from flask_pymongo import PyMongo
+import numpy as np
 
-from config import FLASK_HOST, FLASK_PORT, MONGO_URL, TEMPLATES_PATH, STATIC_PATH, COLOR_DICT, TRACKED_USERS
+from config import FLASK_HOST, FLASK_PORT, MONGO_URL, TEMPLATES_PATH, STATIC_PATH, COLOR_DICT, STATE_LIST,\
+    VACCINE_GRAPH_COLS, COLOR_LIST
 from workers.data_preprocess import GraphDataFormatter
 from workers.twitter_operations import TwitterHandler
 
@@ -38,6 +42,7 @@ def test():
 def home():
     daily_result = graph_data_formatter.get_current_days_data()
     time_series_total, time_series_daily = graph_data_formatter.get_time_series_data()
+    state_vaccine_daily, state_vaccine_agg = graph_data_formatter.get_vaccine_data(state="India")
 
     covid_twitter_data = list(mongo.db.twitter_stream_data.find({}).sort('code', pymongo.DESCENDING).limit(100))
     hashtag_twitter_data = list(mongo.db.hashtag_specific_data.find({}).sort('mined_at', pymongo.DESCENDING).limit(100))
@@ -45,9 +50,6 @@ def home():
 
     assert time_series_total, "Time series (Total) data not obtained from `data_preprocess.py`"
     assert time_series_daily, "Time series (Daily) data not obtained from `data_preprocess.py`"
-    assert covid_twitter_data, "twitter data not available in MongoDB"
-    assert hashtag_twitter_data, "hashtag data not available in MongoDB"
-    assert user_specific_data, "user data not available in MongoDB"
     # Formatting it according to Chart js. (can be formatted according to any other graph libs here..)
 
     # user timeline data formatting
@@ -70,7 +72,7 @@ def home():
             })
 
     time_series_total_formatted = {
-        "labels": time_series_total['data'][0]['x'],
+        "labels": time_series_total['data'][0]['x'],  # The date column
         "datasets": [
             {"data": i["y"], "label": i["name"],
              "borderColor": COLOR_DICT.get(i["name"].split()[1], COLOR_DICT["Other"]),
@@ -89,7 +91,52 @@ def home():
         ]
     }
 
-    # Todo: Add all important users in a dict and save their name as key and data as value
+    vaccine_data = []
+    final_formatted_vaccine_data = []
+
+    for vaccine_chart_type in [co for co in state_vaccine_daily['data'] if co not in ['Updated On', 'State']]:
+        vaccine_data.append({
+            vaccine_chart_type: [{
+                "data": state_vaccine_daily['data'][vaccine_chart_type],
+                "label": vaccine_chart_type,
+                "borderColor": list(np.random.choice(COLOR_LIST, 1, replace=False))[0],
+                "tension": 0.1,
+                "pointBorderWidth": 1,
+                "fill": False,
+                "pointRadius": 1
+            }]
+        })
+
+    for c_, col_combination in enumerate([
+        ('Total Individuals Registered', 'Total Doses Administered'),
+        ('delta_total_individuals_registered', 'delta_total_doses_administered'),
+        ('First Dose Administered', 'Second Dose Administered'),
+        ('delta_first_dose_administered', 'delta_second_dose_administered'),
+        ('Total Covaxin Administered', 'Total CoviShield Administered'),
+        ('delta_total_covaxin_administered', 'delta_total_covishield_administered'),
+        ('Male', 'Female', 'Transgender'),
+        ('delta_male', 'delta_female', 'delta_transgender')
+    ]):
+        final_formatted_vaccine_data.append({
+            "chart_id": f"vac_{c_+100}",
+            "chart_name": " V/S ".join([c.replace('_', " ") for c in col_combination]).title(),
+            "chart_data": {
+                "labels": state_vaccine_daily['data']['Updated On'],
+                "datasets": [j[i][0] for j in vaccine_data for i in col_combination if
+                             i in j]
+            }
+        })
+
+    vac_agg_fn = {}
+    for k, v in state_vaccine_agg.items():
+        k = k.replace('Total', "").strip()
+        if k.startswith('delta'):
+            k = " ".join(k.split("_"))
+            k = k.replace("delta", "").strip()
+            k = f"{k} Per Day".title()
+
+        vac_agg_fn[k] = v
+
     return render_template(
         'dashboard.html',
         title='Dashboard',
@@ -98,7 +145,98 @@ def home():
         time_series_daily=time_series_daily_formatted,
         covid_twitter_data=covid_twitter_data,
         hashtag_twitter_data=hashtag_twitter_data,
-        user_specific_data=tracked_users_dict
+        user_specific_data=tracked_users_dict,
+        vaccine_data=final_formatted_vaccine_data,
+        vaccine_agg=vac_agg_fn,
+        state_list=STATE_LIST
+    )
+
+
+@app.route("/home/<state>", methods=["GET", "POST"])
+def state_analysis(state="#"):
+    state_total, state_daily = graph_data_formatter.get_state_wise_data(state=state)
+    state_vaccine_daily, state_vaccine_agg = graph_data_formatter.get_vaccine_data(state=state)
+
+    # structuring State data into chart-js display format
+    label = state_daily['data'][0]['x']
+    state_graphs = []
+    for chart_type in state_daily['data']:
+        state_graphs.append({
+            "chart_id": chart_type["name"],
+            "chart_data": {
+                "labels": label,
+                "datasets": [{
+                    "data": chart_type["y"],
+                    "label": chart_type["name"],
+                    "borderColor": COLOR_DICT.get(chart_type["name"].split()[0], COLOR_DICT["Other"]),
+                    "tension": 0.1,
+                    "pointBorderWidth": 1,
+                    "fill": False,
+                    "pointRadius": 1
+                }]
+            }
+        })
+
+    # Structuring Vaccine data into chart-js display format
+
+    # STATE VACCINE DAILY
+    vaccine_data = []
+    final_formatted_vaccine_data = []
+
+    for vaccine_chart_type in [co for co in state_vaccine_daily['data'] if co not in ['Updated On', 'State']]:
+        vaccine_data.append({
+            vaccine_chart_type: [{
+                "data": state_vaccine_daily['data'][vaccine_chart_type],
+                "label": vaccine_chart_type,
+                "borderColor": list(np.random.choice(COLOR_LIST, 1, replace=False))[0],
+                "tension": 0.1,
+                "pointBorderWidth": 1,
+                "fill": False,
+                "pointRadius": 1
+            }]
+        })
+
+    for c_, col_combination in enumerate([
+        ('Total Individuals Registered', 'Total Doses Administered'),
+        ('delta_total_individuals_registered', 'delta_total_doses_administered'),
+        ('First Dose Administered', 'Second Dose Administered'),
+        ('delta_first_dose_administered', 'delta_second_dose_administered'),
+        ('Total Covaxin Administered', 'Total CoviShield Administered'),
+        ('delta_total_covaxin_administered', 'delta_total_covishield_administered'),
+        ('Male', 'Female', 'Transgender'),
+        ('delta_male', 'delta_female', 'delta_transgender')
+    ]):
+
+        final_formatted_vaccine_data.append({
+            "chart_id": f"vac_{c_}",
+            "chart_name": " V/S ".join([c.replace('_', " ") for c in col_combination]).title(),
+            "chart_data": {
+                "labels": state_vaccine_daily['data']['Updated On'],
+                "datasets": [j[i][0] for j in vaccine_data for i in col_combination if
+                             i in j]
+            }
+        })
+
+    vac_agg_fn = {}
+    for k, v in state_vaccine_agg.items():
+        k = k.replace('Total', "").strip()
+        if k.startswith('delta'):
+            k = " ".join(k.split("_"))
+            k = k.replace("delta", "").strip()
+            k = f"{k} Per Day".title()
+
+        vac_agg_fn[k] = v
+
+
+    return render_template(
+        'statewise.html',
+        title='Dashboard',
+        daily_data=state_total,
+        state_daily=state_graphs,
+        state_list=STATE_LIST,
+        current_state=state,
+        vaccine_data=final_formatted_vaccine_data,
+        vaccine_agg=vac_agg_fn
     )
 
 
