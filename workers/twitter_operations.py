@@ -62,10 +62,10 @@ class TwitterHandler:
             place_id = place[0].id
             data_to_insert = []
 
-            for tweet in tweepy.Cursor(self.api.search, q=f"place:{place_id} {f' {agg_type} '.join(hashtag)}").items(count):
+            for tweet in tweepy.Cursor(self.api.search, q=f"place:{place_id} {f' {agg_type} '.join(hashtag)}", tweet_mode='extended').items(count):
                 hashtag_tweet_dict = {
                     "mined_at": int(time.time()),
-                    "text": tweet.text,
+                    "text": tweet.full_text,
                     "created_at": tweet.created_at,
                     "user_location": tweet.user.location,
                     "category": hashtag,
@@ -84,15 +84,15 @@ if __name__ == "__main__":
     t = TwitterHandler()
     from config import TRACKED_USERS
 
-    for u in tqdm(TRACKED_USERS):
-        t.get_user_timeline(user_id=u, count=50)
+    # for u in tqdm(TRACKED_USERS):
+    #     t.get_user_timeline(user_id=u, count=50)
 
     # print(t.get_user_timeline(user_id="@covid19indiaorg", count=20))
     #
-    # for _ in tqdm(range(5)):
-    #     x = random.choice(['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"])
-    #     y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
-    #
-    #     t.get_tweets_from_hashtag(hashtag=[x, y], count=50, agg_type=random.choice(['OR', 'AND']))
+    for _ in tqdm(range(1)):
+        x = random.choice(['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"])
+        y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
+
+        t.get_tweets_from_hashtag(hashtag=[x, y], count=50, agg_type=random.choice(['AND']))
 
     # print(t.get_tweets_from_hashtag(hashtag=["#Beds", "#Urgent", "#Help", "#Oxygen", "#Remdesivir", "#Ventilator"], count=200, agg_type="OR"))
