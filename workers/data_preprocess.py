@@ -1,14 +1,15 @@
 import pandas as pd
 import numpy as np
 
-from config import PATHS
+from config import PATHS, COLOR_LIST
 
 
 keep_cols = [
             'Updated On', 'State', 'Total Individuals Registered', 'First Dose Administered',
             'Second Dose Administered', 'Male(Individuals Vaccinated)', 'Female(Individuals Vaccinated)',
             'Transgender(Individuals Vaccinated)', 'Total Covaxin Administered', 'Total CoviShield Administered',
-            'Total Doses Administered'
+            'Total Doses Administered', 'AEFI', '18-30 years(Age)', '30-45 years(Age)', '45-60 years(Age)',
+            '60+ years(Age)'
         ]
 
 
@@ -35,10 +36,11 @@ class GraphDataFormatter:
 
         # Vaccination data
         self.vaccine_state_df = pd.read_csv(self.path['vaccination']['state_daily'])
-        self.vaccine_state_df = self.vaccine_state_df[keep_cols]
         self.vaccine_state_df.rename(columns={
             'Male(Individuals Vaccinated)': 'Male', 'Female(Individuals Vaccinated)': 'Female',
-            'Transgender(Individuals Vaccinated)': 'Transgender'
+            'Transgender(Individuals Vaccinated)': 'Transgender', 'AEFI': 'Adverse Event Following Immunization',
+            '18-30 years(Age)': 'Age Group 18-30', '30-45 years(Age)': 'Age Group 30-45',
+            '45-60 years(Age)': 'Age Group 45-60', '60+ years(Age)': 'Age Group 60+'
         }, inplace=True)
         self.vaccine_state_df.fillna(0.0, axis=1, inplace=True)
 
@@ -87,6 +89,11 @@ class GraphDataFormatter:
     def get_state_wise_data(self, state):
         daily_state_df = self.state_wise_daily_df[self.state_wise_daily_df['State'] == state]
         total_state_df = self.state_wise_total_df[self.state_wise_total_df['State'] == state].to_dict()
+
+        for col in daily_state_df.columns[2:]:
+            daily_state_df[f'Daily {" ".join(col.split())}'] = daily_state_df[col].diff()
+        daily_state_df.fillna(0.0, axis=1, inplace=True)
+
         daily = {
             "state": state,
             "data": [
@@ -95,7 +102,10 @@ class GraphDataFormatter:
                     "x": list(daily_state_df['Date']),
                     "y": list(daily_state_df[d_type])
                 }
-                for d_type in ['Confirmed', 'Recovered', 'Deceased', 'Tested']
+                for d_type in [
+                    'Confirmed', 'Daily Confirmed', 'Recovered', 'Daily Recovered', 'Deceased', 'Daily Deceased',
+                    'Tested', 'Daily Tested'
+                ]
             ]
         }
         total = {
@@ -147,7 +157,11 @@ class GraphDataFormatter:
     def get_vaccine_data(self, state):
         vac_daily_df = self.vaccine_state_df[self.vaccine_state_df["State"] == state]
         # Creating delta columns
-        for col in [vc for vc in vac_daily_df.columns if vc not in ['Updated On', 'State']]:
+        for col in [vc for vc in vac_daily_df.columns if vc not in [
+            'Updated On', 'State', 'Adverse Event Following Immunization', 'Age Group 18-30', 'Age Group 30-45',
+            'Age Group 45-60', 'Age Group 60+'
+
+        ]]:
             vac_daily_df[f'delta_{"_".join(col.split())}'.lower()] = vac_daily_df[col].diff()
         vac_daily_df.fillna(0.0, axis=1, inplace=True)
 
@@ -162,6 +176,29 @@ class GraphDataFormatter:
         }
         del vac_data
         return daily, vac_agg_data
+
+    def get_top_states_data(self, top=10):
+        state_df = self.state_wise_total_df.copy()
+        top_state_total_result = []
+        for g_, g_type in enumerate(['Confirmed', 'Active', 'Recovered', 'Deaths']):
+            temp = state_df.sort_values(g_type, ascending=False)[['State', g_type]][1:]
+            label_l = list(temp['State'][:top])
+            data_l = list(temp[g_type][:top])
+
+            top_state_total_result.append({
+                "g_title": f"Top 10 {g_type} States",
+                "g_id": f"{g_type}_{g_}",
+                "g_data": {
+                    "labels": label_l,
+                    "datasets": [{
+                        "label": g_type,
+                        "backgroundColor": [COLOR_LIST[i] for i in range(len(label_l))],
+                        "data": data_l
+                    }]
+                }
+            })
+
+        return top_state_total_result
 
 
 if __name__ == "__main__":

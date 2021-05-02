@@ -88,14 +88,14 @@
 
             {% endfor %}
 
-            <h1 class="text-white text-center">Average Distribution Of Vaccine</h1><br>
+            <h1 class="text-white text-center">Distribution Statistics Of Vaccine</h1><br>
 
             {% for k, v in vaccine_agg.items() %}
                 <div class="card text-white bg-danger m-1" style="max-width: 18rem;">
                     <div class="card-header">Facts</div>
                     <div class="card-body">
                         <h5 class="card-title">Average {{k}}</h5>
-                        <p class="card-text">{{v['mean']|float|round}}</p>
+                        <p class="card-text">{{"{:,}".format(v['mean']|float|round)}}</p>
                     </div>
                 </div>
             {% endfor %}

@@ -43,7 +43,6 @@ class TwitterHandler:
             if hashtags:
                 hashtags = [h['text'] for h in tweet_text['entities'].get("hashtags", [])]
 
-            print(hashtags)
             tweet_dict = {
                 "name": tweet_text['user'].get('name', user_id),
                 "mined_at": int(time.time()),
@@ -85,15 +84,15 @@ if __name__ == "__main__":
     t = TwitterHandler()
     from config import TRACKED_USERS
 
-    for u in TRACKED_USERS:
-        t.get_user_timeline(user_id=u, count=20)
+    # for u in tqdm(TRACKED_USERS):
+    #     t.get_user_timeline(user_id=u, count=50)
 
     # print(t.get_user_timeline(user_id="@covid19indiaorg", count=20))
 
-    # for _ in tqdm(range(20)):
-    #     x = random.choice(['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"])
-    #     y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
-    #
-    #     t.get_tweets_from_hashtag(hashtag=[x, y], count=20, agg_type=random.choice(['OR', 'AND']))
+    for _ in tqdm(range(5)):
+        x = random.choice(['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"])
+        y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
+
+        t.get_tweets_from_hashtag(hashtag=[x, y], count=50, agg_type=random.choice(['OR', 'AND']))
 
     # print(t.get_tweets_from_hashtag(hashtag=["#Beds", "#Urgent", "#Help", "#Oxygen", "#Remdesivir", "#Ventilator"], count=200, agg_type="OR"))

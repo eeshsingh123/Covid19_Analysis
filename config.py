@@ -17,10 +17,10 @@ OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', '
 
 VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
-TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI"]
+TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI", "@BloodDonorsIn"]
 
-STREAM_DATA_KEEP_DAYS = 3
-USER_HASHTAG_KEEP_DAYS = 5
+STREAM_DATA_KEEP_DAYS = 5
+USER_HASHTAG_KEEP_DAYS = 30
 
 SEARCH_BY_HASHTAG = {
     'bed': 'bed',
@@ -129,9 +129,12 @@ COLOR_LIST = ['#6a2c70', '#b83b5e', '#f08a5d', '#056674', '#16213e', '#1a1a2e', 
 
 COLOR_DICT = {
     "Confirmed": "#B22222",
-    "Deceased": "#9884b5",
-    "Recovered": "#00FF7F",
-    "Other": "#E6E6FA"
+    "Daily Confirmed": "#DC143C",
+    "Deceased": "#87CEEB",
+    "Daily Deceased": "#87CEEB",
+    "Recovered": "#00FF00",
+    "Daily Recovered": "#00FF00",
+    "Other": "#FFFAFA"
 }
 
 STATE_LIST = [

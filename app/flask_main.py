@@ -43,8 +43,9 @@ def home():
     daily_result = graph_data_formatter.get_current_days_data()
     time_series_total, time_series_daily = graph_data_formatter.get_time_series_data()
     state_vaccine_daily, state_vaccine_agg = graph_data_formatter.get_vaccine_data(state="India")
+    top_states_total = graph_data_formatter.get_top_states_data(top=10)
 
-    covid_twitter_data = list(mongo.db.twitter_stream_data.find({}).sort('code', pymongo.DESCENDING).limit(100))
+    covid_twitter_data = list(mongo.db.twitter_stream_data.find({}).sort('code', pymongo.DESCENDING).limit(50))
     hashtag_twitter_data = list(mongo.db.hashtag_specific_data.find({}).sort('mined_at', pymongo.DESCENDING).limit(100))
     user_specific_data = list(mongo.db.user_timeline_data.find({}).sort('mined_at', pymongo.DESCENDING))
 
@@ -55,9 +56,6 @@ def home():
     # user timeline data formatting
     tracked_users_dict = {}
     for user_data in user_specific_data:
-
-        user_data['hashtags'] = [i['text'] for i in user_data['hashtags']]
-
         if user_data['name'] not in tracked_users_dict:
             tracked_users_dict[user_data['name']] = [{
                 "created_at": user_data['created_at'],
@@ -76,7 +74,7 @@ def home():
         "datasets": [
             {"data": i["y"], "label": i["name"],
              "borderColor": COLOR_DICT.get(i["name"].split()[1], COLOR_DICT["Other"]),
-             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 1}
+             "tension": 0.1, "pointBorderWidth": 0.2, "borderWidth":1.8, "fill": False, "pointRadius": 1}
             for i in time_series_total["data"]
         ]
     }
@@ -86,7 +84,7 @@ def home():
         "datasets": [
             {"data": j["y"], "label": j["name"],
              "borderColor": COLOR_DICT.get(j["name"].split()[1], COLOR_DICT["Other"]),
-             "tension": 0.1, "pointBorderWidth": 1, "fill": False, "pointRadius": 1}
+             "tension": 0.1, "pointBorderWidth": 0.2, "borderWidth":1.8, "fill": False, "pointRadius": 1}
             for j in time_series_daily["data"]
         ]
     }
@@ -94,7 +92,7 @@ def home():
     vaccine_data = []
     final_formatted_vaccine_data = []
 
-    for vaccine_chart_type in [co for co in state_vaccine_daily['data'] if co not in ['Updated On', 'State']]:
+    for vaccine_chart_type in [co for co in state_vaccine_daily['data'] if co not in ['Updated On', 'State', 'AEFI']]:
         vaccine_data.append({
             vaccine_chart_type: [{
                 "data": state_vaccine_daily['data'][vaccine_chart_type],
@@ -108,8 +106,8 @@ def home():
         })
 
     for c_, col_combination in enumerate([
-        ('Total Individuals Registered', 'Total Doses Administered'),
-        ('delta_total_individuals_registered', 'delta_total_doses_administered'),
+        ('Total Sessions Conducted', 'Total Doses Administered'),
+        ('delta_total_sessions_conducted', 'delta_total_doses_administered'),
         ('First Dose Administered', 'Second Dose Administered'),
         ('delta_first_dose_administered', 'delta_second_dose_administered'),
         ('Total Covaxin Administered', 'Total CoviShield Administered'),
@@ -127,6 +125,7 @@ def home():
             }
         })
 
+    # making agg data user friendly
     vac_agg_fn = {}
     for k, v in state_vaccine_agg.items():
         k = k.replace('Total', "").strip()
@@ -147,6 +146,7 @@ def home():
         hashtag_twitter_data=hashtag_twitter_data,
         user_specific_data=tracked_users_dict,
         vaccine_data=final_formatted_vaccine_data,
+        top_states_total=top_states_total,
         vaccine_agg=vac_agg_fn,
         state_list=STATE_LIST
     )
@@ -168,9 +168,10 @@ def state_analysis(state="#"):
                 "datasets": [{
                     "data": chart_type["y"],
                     "label": chart_type["name"],
-                    "borderColor": COLOR_DICT.get(chart_type["name"].split()[0], COLOR_DICT["Other"]),
-                    "tension": 0.1,
-                    "pointBorderWidth": 1,
+                    "borderColor": COLOR_DICT.get(chart_type["name"].split()[0], COLOR_DICT.get(chart_type["name"], COLOR_DICT['Other'])),
+                    "tension": 0,
+                    "pointBorderWidth": 0.2,
+                    "borderWidth":1.8,
                     "fill": False,
                     "pointRadius": 1
                 }]
@@ -190,7 +191,8 @@ def state_analysis(state="#"):
                 "label": vaccine_chart_type,
                 "borderColor": list(np.random.choice(COLOR_LIST, 1, replace=False))[0],
                 "tension": 0.1,
-                "pointBorderWidth": 1,
+                "pointBorderWidth": 0.2,
+                "borderWidth": 1.9,
                 "fill": False,
                 "pointRadius": 1
             }]
@@ -226,7 +228,6 @@ def state_analysis(state="#"):
             k = f"{k} Per Day".title()
 
         vac_agg_fn[k] = v
-
 
     return render_template(
         'statewise.html',
