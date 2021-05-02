@@ -132,7 +132,7 @@
                     </div>
 		    </section>
         </div>
-    </div>
+    </div><br>
 
     <div class="container">
         <div class="row gx-1">
@@ -177,7 +177,7 @@
                     </div>
 		    </section>
         </div>
-    </div>
+    </div><br>
 
     <div class="container">
         <div class="row gx-1">
@@ -214,7 +214,17 @@
                 </div>
             {% endfor %}
         </div>
-    </div>
+    </div><br>
+
+    <div class="container">
+        <h1 class="text-white text-center">Current Trend</h1>
+        <div id="{{trending_data['chart_id']}}"></div>
+        <script type="text/javascript">
+            var chart_id = "{{trending_data['chart_id']}}"
+            var chart_data = {{ trending_data['chart_data']|tojson }}
+        </script>
+        <script src="{{url_for('static', filename='js/wordcloud.js')}}"></script>
+    </div><br>
 
 
 {% endblock twitter_data %}

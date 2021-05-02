@@ -17,7 +17,7 @@ OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', '
 
 VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
-TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI", "@BloodDonorsIn"]
+TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI", "@BloodDonorsIn", "@CovidIndiaSeva", "@MoHFW_INDIA"]
 
 STREAM_DATA_KEEP_DAYS = 5
 USER_HASHTAG_KEEP_DAYS = 30

@@ -34,7 +34,7 @@ class Listener(StreamListener):
         self.covid_data_list = []
         self.value_list = []
         self.thresh = 5
-        self.trending_thresh = 100
+        self.trending_thresh = 500
         self.counter, self.trending_counter = 0, 0
 
     def on_connect(self):
@@ -67,23 +67,13 @@ class Listener(StreamListener):
             # Tweet text
             if not tweet["truncated"]:
                 tweet_data = de_emojify(unidecode(tweet["text"]))
-                sentiment = TextBlob(tweet_data).sentiment.polarity
             else:
                 tweet_data = de_emojify(unidecode(tweet['extended_tweet']['full_text']))
-                sentiment = int(TextBlob(tweet_data).sentiment.polarity)
-
-            if sentiment > 0:
-                sentiment = "Positive"
-            elif sentiment == 0:
-                sentiment = "Neutral"
-            else:
-                sentiment = "Negative"
 
             print("TEXT-> ", tweet_data)
             print("CREATED_AT-> ", created_at)
             print("USER_LOCATION-> ", user_location)
             print("VERIFIED-> ", user_verified)
-            print("SENTIMENT->", sentiment)
             print('---------------------------------------------------------------------\n')
 
             data_to_insert = {
@@ -95,7 +85,6 @@ class Listener(StreamListener):
                 "user_name": user_name,
                 "screen_name": screen_name,
                 "user_verified": user_verified,
-                "sentiment": sentiment
             }
 
             # Tweet filtering Logic
@@ -115,7 +104,6 @@ class Listener(StreamListener):
                 data_to_insert.update({'category': category})
                 self.value_list.append(InsertOne(data_to_insert))
                 self.counter += 1
-                self.trending_counter += 1
 
                 # Insert all the entries into mongoDB
                 if self.counter % self.thresh == 0:
@@ -125,10 +113,13 @@ class Listener(StreamListener):
                     self.counter = 0
                     self.value_list = []
 
-                    # Trending data generation after 500 entries
-                    if self.trending_counter % self.trending_thresh == 0:
-                        generate_trending()
-                        self.trending_counter = 0
+            self.trending_counter += 1
+            # Trending data generation after 800 entries
+            if self.trending_counter % self.trending_thresh == 0:
+                print('===============Trending Threshold Satisfied===============')
+                generate_trending()
+                self.trending_counter = 0
+                time.sleep(1)
 
         except Exception as e:
             traceback.print_exc()
@@ -154,7 +145,7 @@ def generate_trending():
 
         df['nouns'] = df['tweet_data'].apply(lambda x: [word[0] for word in TextBlob(x).tags if word[1] == u'NNP'])
         tokens = split_regex.split(' '.join(list(itertools.chain.from_iterable(df['nouns'].values.tolist()))).lower())
-        trending = (Counter(tokens) - bad_words).most_common(10)
+        trending = (Counter(tokens) - bad_words).most_common(30)
 
         if trending:
             # print('updating trending')

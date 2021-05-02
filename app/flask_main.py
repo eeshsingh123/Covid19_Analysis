@@ -40,18 +40,33 @@ def test():
 
 @app.route('/home', methods=["POST", "GET"])
 def home():
+    # DATA LOADING
     daily_result = graph_data_formatter.get_current_days_data()
     time_series_total, time_series_daily = graph_data_formatter.get_time_series_data()
     state_vaccine_daily, state_vaccine_agg = graph_data_formatter.get_vaccine_data(state="India")
     top_states_total = graph_data_formatter.get_top_states_data(top=10)
 
+    # EXTRACTING DATA FROM MongoDB
     covid_twitter_data = list(mongo.db.twitter_stream_data.find({}).sort('code', pymongo.DESCENDING).limit(50))
     hashtag_twitter_data = list(mongo.db.hashtag_specific_data.find({}).sort('mined_at', pymongo.DESCENDING).limit(100))
     user_specific_data = list(mongo.db.user_timeline_data.find({}).sort('mined_at', pymongo.DESCENDING))
+    twitter_trending_data = list(mongo.db.trending_data.find({}).sort('code', pymongo.DESCENDING).limit(1))
 
     assert time_series_total, "Time series (Total) data not obtained from `data_preprocess.py`"
     assert time_series_daily, "Time series (Daily) data not obtained from `data_preprocess.py`"
     # Formatting it according to Chart js. (can be formatted according to any other graph libs here..)
+
+    # TWITTER DATA
+    # trending data preprocessing
+    trend_format = []
+    for trend_d in twitter_trending_data:
+        for trend_l in trend_d['trending']:
+            trend_format.append({"word": str(trend_l[0]), "size": str(trend_l[1] * 9)})
+
+    final_trend_format = {
+        "chart_id": "trend-wordcloud-1",
+        "chart_data": trend_format
+    }
 
     # user timeline data formatting
     tracked_users_dict = {}
@@ -69,6 +84,7 @@ def home():
                 "hashtags": user_data['hashtags']
             })
 
+    # TIME SERIES OF CASES DATA FORMATTING
     time_series_total_formatted = {
         "labels": time_series_total['data'][0]['x'],  # The date column
         "datasets": [
@@ -89,6 +105,7 @@ def home():
         ]
     }
 
+    # VACCINATION DATA PREPROCESSING
     vaccine_data = []
     final_formatted_vaccine_data = []
 
@@ -148,7 +165,8 @@ def home():
         vaccine_data=final_formatted_vaccine_data,
         top_states_total=top_states_total,
         vaccine_agg=vac_agg_fn,
-        state_list=STATE_LIST
+        state_list=STATE_LIST,
+        trending_data=final_trend_format
     )
 
 

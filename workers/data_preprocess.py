@@ -197,7 +197,7 @@ class GraphDataFormatter:
                     }]
                 }
             })
-
+        del state_df
         return top_state_total_result
 
 
