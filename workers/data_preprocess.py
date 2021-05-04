@@ -164,6 +164,7 @@ class GraphDataFormatter:
         ]]:
             vac_daily_df[f'delta_{"_".join(col.split())}'.lower()] = vac_daily_df[col].diff()
         vac_daily_df.fillna(0.0, axis=1, inplace=True)
+        vac_daily_df = vac_daily_df[:-1]
 
         vac_agg_data = vac_daily_df.describe().apply(lambda s: s.apply('{0:.5f}'.format)).to_dict()
 

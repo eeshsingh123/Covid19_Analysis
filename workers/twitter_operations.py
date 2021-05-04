@@ -89,9 +89,9 @@ if __name__ == "__main__":
 
     # print(t.get_user_timeline(user_id="@covid19indiaorg", count=20))
     #
-    for _ in tqdm(range(1)):
-        x = random.choice(['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"])
-        y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"])
+    for _ in tqdm(range(10)):
+        x = random.choice(['#Help', '#Help', '#Urgent', '#urgent', "#Available", "#available"])
+        y = random.choice(["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Vaccine"])
 
         t.get_tweets_from_hashtag(hashtag=[x, y], count=50, agg_type=random.choice(['AND']))
 

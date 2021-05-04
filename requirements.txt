@@ -12,5 +12,11 @@ Unidecode==1.1.1
 kaggle==1.5.6
 requests==2.22.0
 Flask==1.1.1
+flask_pymongo
 pymongo
+pytz
+tzlocal
+tqdm
+redis
+rq
 rq-scheduler==0.9.1

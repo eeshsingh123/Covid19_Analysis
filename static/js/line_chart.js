@@ -7,8 +7,8 @@ var lineChart = new Chart(ctx, {
     options:{
         responsive: false,
         scales: {
-            x: {ticks:{color:'#FFFAFA'}},
-            y: {ticks:{color:'#FFFAFA'}}
+            x: {ticks:{color:'#FFFAFA'}, grid:{color:'#454444'}},
+            y: {ticks:{color:'#FFFAFA'}, grid:{color:'#454444'}}
         },
         plugins:{
             title: {

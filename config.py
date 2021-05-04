@@ -1,11 +1,27 @@
 import os
 import json
 
+LTS = True
+
 DEBUG = os.environ.get("DEBUG", True)
-BASE_PATH = os.environ.get("BASE_PATH", os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis'))
-BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH", os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis', 'data'))
-if not os.path.isdir(BASE_PATH):
-    os.mkdir(BASE_DATA_PATH)
+
+if LTS:
+    BASE_PATH = os.environ.get("BASE_PATH", os.path.join(os.sep, 'mnt', 'c', 'Projects', 'Python_projects', 'Covid19_Analysis'))
+    BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH",
+                                    os.path.join(os.sep, 'mnt', 'c', 'Projects', 'Python_projects', 'Covid19_Analysis', 'data'))
+else:
+    BASE_PATH = os.environ.get("BASE_PATH", os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis'))
+    BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH",
+                                    os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis', 'data'))
+    if not os.path.isdir(BASE_PATH):
+        os.mkdir(BASE_DATA_PATH)
+
+RQ_CHANNELS = {'data_updater': 'daily_data_updater'}
+
+REDIS_CONN = {
+    "host": os.environ.get("REDIS_HOST", "localhost"),
+    "port": os.environ.get("REDIS_PORT", 6379)
+}
 
 COVID_TRACK_WORDS = ['corona', 'covid19', 'covid-19', 'pandemic', 'virus', 'vaccine', 'vaccination', 'remdesivir injection', 'remdesivir']
 
@@ -18,6 +34,8 @@ OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', '
 VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
 TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI", "@BloodDonorsIn", "@CovidIndiaSeva", "@MoHFW_INDIA"]
+HASHTAG_1 = ['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"]
+HASHTAG_2 = ["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"]
 
 STREAM_DATA_KEEP_DAYS = 5
 USER_HASHTAG_KEEP_DAYS = 30
@@ -112,7 +130,9 @@ SENTIMENT_COLORS = {
     1: "#9CEC5B"
 }
 
-COLOR_LIST = ['#6a2c70', '#b83b5e', '#f08a5d', '#056674', '#16213e', '#1a1a2e', '#0f3460', '#206a5d',
+COLOR_PALETTE = ["#ffcb91", "#ffefa1", "#94ebcd", "#bfcc80"]
+
+COLOR_LIST = ['#6a2c70', '#b83b5e', '#f08a5d', '#056674', "#ffcb91", "#ffefa1", "#94ebcd", "#6ddccf",
               '#81b214', '#ff8e6e', '#515070', '#6e6d6d', '#ff7171',
               '#f9f437', '#017ac1', '#bfcc80', '#1da07e', '#805854', '#4b7c14', '#a0e769', '#671c93', '#ad7775',
               '#a3427b', '#a86d41', '#fa3709', '#83275d', '#efa15f', '#c9c692', '#720b2d', '#19c983', '#b60902',
