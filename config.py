@@ -1,9 +1,8 @@
 import os
 import json
 
-LTS = True
-
 DEBUG = os.environ.get("DEBUG", True)
+LTS = True if not DEBUG else False
 
 if LTS:
     BASE_PATH = os.environ.get("BASE_PATH", os.path.join(os.sep, 'mnt', 'c', 'Projects', 'Python_projects', 'Covid19_Analysis'))

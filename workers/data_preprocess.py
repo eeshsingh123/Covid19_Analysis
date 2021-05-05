@@ -42,7 +42,12 @@ class GraphDataFormatter:
             '18-30 years(Age)': 'Age Group 18-30', '30-45 years(Age)': 'Age Group 30-45',
             '45-60 years(Age)': 'Age Group 45-60', '60+ years(Age)': 'Age Group 60+'
         }, inplace=True)
-        self.vaccine_state_df.fillna(0.0, axis=1, inplace=True)
+        self.vaccine_state_df.dropna(
+            subset=[co for co in self.vaccine_state_df.columns if co not in ['Total Doses Administered', 'Updated On', 'State']],
+            how='all',
+            axis=0,
+            inplace=True
+        )
 
         self.vaccine_state_total_df = pd.read_csv(self.path['vaccination']['state_total'])
         self.vaccine_state_total_df.fillna(2832152, axis=1, inplace=True)
@@ -163,8 +168,6 @@ class GraphDataFormatter:
 
         ]]:
             vac_daily_df[f'delta_{"_".join(col.split())}'.lower()] = vac_daily_df[col].diff()
-        vac_daily_df.fillna(0.0, axis=1, inplace=True)
-        vac_daily_df = vac_daily_df[:-1]
 
         vac_agg_data = vac_daily_df.describe().apply(lambda s: s.apply('{0:.5f}'.format)).to_dict()
 
@@ -187,7 +190,7 @@ class GraphDataFormatter:
             data_l = list(temp[g_type][:top])
 
             top_state_total_result.append({
-                "g_title": f"Top 10 {g_type} States",
+                "g_title": f"Top 10 States With Most {g_type} Cases",
                 "g_id": f"{g_type}_{g_}",
                 "g_data": {
                     "labels": label_l,

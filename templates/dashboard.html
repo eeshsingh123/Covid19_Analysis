@@ -1,21 +1,26 @@
 {% extends "generic.html" %}
 
 {%block side_navigation_bar %}
-    <div class="collapse" id="navbarToggleExternalContent">
-        <div class="bg-dark p-4">
-            <h5 class="text-white h4">State-wise Data Analysis</h5>
-            {% for state_name in state_list %}
-                <div class="btn-group mb-2" role="group" aria-label="State button group">
-                    <button type="button" class="btn btn-primary btn-sm active" onclick="window.location.href='{{url_for('state_analysis', state=state_name)}}'">{{state_name}}</button>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    <nav class="navbar navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="{{url_for('home')}}">Home</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
+            <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        State Wise Analysis
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                            {% for state_name in state_list %}
+                                <li><a class="dropdown-item" href="{{url_for('state_analysis', state=state_name)}}">{{state_name}}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -39,7 +44,7 @@
                     <div class="card-body">
                         <h6 class="card-title text-center justify-content-center">{{itr}}</h6>
                         <h3 class="card-text text-center">{{"{:,}".format(daily_data[itr])}}</h3>
-                        <h6 class="card-text text-center text-success">
+                        <h6 class="card-text text-center text-success fw-bold">
                             <i class="bi-plus"></i>
                             {{"{:,}".format(daily_data['Delta_' + itr])}}
                         </h6>
@@ -50,7 +55,7 @@
     </div>
 
     <div class="container mb-2">
-        <div class=" p-3 mb-2 bg-success text-white text-center">Vaccine Administered: {{"{:,}".format(daily_data['Vaccine Administered'])}}</div>
+        <h5 class=" p-3 mb-2 bg-warning text-dark text-center fw-bold">Vaccine Administered: {{"{:,}".format(daily_data['Vaccine Administered'])}}</h5>
     </div>
 
 {% endblock daily_data %}
@@ -249,11 +254,11 @@
             <h1 class="text-white text-center">Distribution Statistics Of Vaccine</h1><br>
 
             {% for k, v in vaccine_agg.items() %}
-                <div class="card text-white bg-danger m-1" style="max-width: 18rem;">
+                <div class="card text-white bg-secondary m-1" style="max-width: 18rem;">
                     <div class="card-header">Facts</div>
                     <div class="card-body">
-                        <h5 class="card-title">Average {{k}}</h5>
-                        <p class="card-text">{{"{:,}".format(v['mean']|float|round)}}</p>
+                        <h6 class="card-title">Average {{k}}</h6>
+                        <h3 class="card-text">{{"{:,}".format(v['mean']|float|round)}}</h3>
                     </div>
                 </div>
             {% endfor %}

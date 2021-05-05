@@ -11,7 +11,7 @@ from rq_scheduler import Scheduler
 import numpy as np
 
 from config import FLASK_HOST, FLASK_PORT, MONGO_URL, TEMPLATES_PATH, STATIC_PATH, COLOR_DICT, STATE_LIST, COLOR_LIST, \
-    REDIS_CONN, RQ_CHANNELS
+    REDIS_CONN, RQ_CHANNELS, DEBUG
 from tools.kill_schedules import kill_schedule
 from tools.timezone_corrector import get_current_timezone_time
 from workers.data_preprocess import GraphDataFormatter
@@ -32,23 +32,24 @@ except Exception as ee:
 graph_data_formatter = GraphDataFormatter()
 twitter_handler = TwitterHandler()
 
-today = datetime.datetime.now()
+if not DEBUG:
+    today = datetime.datetime.now()
+    Queue(name=RQ_CHANNELS['data_updater'], connection=RCONN).empty()
+    print('Queue emptied')
+    print('Killing Underlying Schedules', kill_schedule(RQ_CHANNELS['data_updater']))
 
-Queue(name=RQ_CHANNELS['data_updater'], connection=RCONN).empty()
-print('Queue emptied')
-print('Killing Underlying Schedules', kill_schedule(RQ_CHANNELS['data_updater']))
-sch = Scheduler(RQ_CHANNELS['data_updater'], connection=RCONN).schedule(
-    scheduled_time=get_current_timezone_time(datetime.datetime(
-        today.year,
-        today.month,
-        today.day,
-        1, 26
-    ), time_zone="Asia/Kolkata"),
-    func=update_reports_and_twitter_endpoints,
-    interval=3600 * 3,  # every 3 hours
-    repeat=None
-)
-print("Scheduler ->", sch)
+    sch = Scheduler(RQ_CHANNELS['data_updater'], connection=RCONN).schedule(
+        scheduled_time=get_current_timezone_time(datetime.datetime(
+            today.year,
+            today.month,
+            today.day,
+            00, 00
+        ), time_zone="Asia/Kolkata"),
+        func=update_reports_and_twitter_endpoints,
+        interval=3600 * 3,  # every 3 hours
+        repeat=None
+    )
+    print("Scheduler ->", sch)
 
 print("*-------------------APP IS READY------------------------*")
 
