@@ -3,7 +3,7 @@ import random
 from tqdm import tqdm
 
 from workers.twitter_operations import TwitterHandler
-from tools.internal_request_handler import internal_request
+from tools.request_handler import internal_request
 from config import FLASK_PORT, TRACKED_USERS, HASHTAG_1, HASHTAG_2
 
 

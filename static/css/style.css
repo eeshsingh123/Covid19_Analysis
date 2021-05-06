@@ -1,9 +1,19 @@
+html,
+body {
+  height: 100%;
+}
+
 body {
   font-family: 'Roboto', sans-serif !important;
   background:linear-gradient(
           rgba(0, 0, 0, 0.9),
           rgba(0, 0, 0, 0.9)
         )
+}
+
+.dropdown-menu{
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .btn-custom {
@@ -15,6 +25,11 @@ table {
   display:block;
   height : 550px;
   overflow-y : scroll;
+}
+
+.table-vaccine {
+  display:block;
+  height : 250px !important;
 }
 
 /* width */

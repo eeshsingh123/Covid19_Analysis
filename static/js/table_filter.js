@@ -20,5 +20,4 @@ $(document).ready(function () {
         $('.table-htag tr').css('display', 'none').fadeIn('slow');
       }
     });
-
  });

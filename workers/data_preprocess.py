@@ -1,8 +1,14 @@
+import time
+import datetime
+import json
+
 import pandas as pd
-import numpy as np
+from redis import Redis
 
-from config import PATHS, COLOR_LIST
+from config import PATHS, COLOR_LIST, REDIS_CONN, BASE_DATA_PATH
+from tools.request_handler import external_vaccine_request
 
+RCONN = Redis(**REDIS_CONN)
 
 keep_cols = [
             'Updated On', 'State', 'Total Individuals Registered', 'First Dose Administered',
@@ -16,6 +22,8 @@ keep_cols = [
 class GraphDataFormatter:
 
     def __init__(self, path=PATHS):
+        self.vaccine_cache = {}
+
         self.path = path
         # Daily active, confirmed, death cases
         self.time_series_df = pd.read_csv(self.path['time_series_df'])
@@ -51,6 +59,9 @@ class GraphDataFormatter:
 
         self.vaccine_state_total_df = pd.read_csv(self.path['vaccination']['state_total'])
         self.vaccine_state_total_df.fillna(2832152, axis=1, inplace=True)
+
+        with open(f"{BASE_DATA_PATH}/default_objects/state_district_mapper.json", 'r', encoding='utf-8') as jfp:
+            self.state_district_map = json.load(jfp)
 
         print("All Dataframes Loaded Successfully!")
 
@@ -161,11 +172,11 @@ class GraphDataFormatter:
 
     def get_vaccine_data(self, state):
         vac_daily_df = self.vaccine_state_df[self.vaccine_state_df["State"] == state]
+        vac_daily_df.fillna(0.0, axis=1, inplace=True)
         # Creating delta columns
         for col in [vc for vc in vac_daily_df.columns if vc not in [
-            'Updated On', 'State', 'Adverse Event Following Immunization', 'Age Group 18-30', 'Age Group 30-45',
-            'Age Group 45-60', 'Age Group 60+'
-
+            'Updated On', 'State', 'Adverse Event Following Immunization', '18-30 years(Age)', '30-45 years(Age)',
+            '45-60 years(Age)', '60+ years(Age)'
         ]]:
             vac_daily_df[f'delta_{"_".join(col.split())}'.lower()] = vac_daily_df[col].diff()
 
@@ -203,6 +214,28 @@ class GraphDataFormatter:
             })
         del state_df
         return top_state_total_result
+
+    def get_vaccine_center_data(self, state_name=None, district_name=None):
+        # clearing cache if data older than 3 hours
+        # last_used_time = RCONN.get(district_name).decode()
+
+        # if int(time.time()) - int(last_used_time) > 10800:
+        #     if district_name in self.vaccine_cache:
+        #         self.vaccine_cache.pop(district_name)
+
+        # else:
+        if district_name in self.vaccine_cache:
+            return self.vaccine_cache[district_name]
+        else:
+            assert state_name in self.state_district_map, f"Invalid State: {state_name} name for State Map Dict"
+            assert district_name in self.state_district_map[state_name], f"Invalid District:{district_name} for State: {state_name}"
+            district_id = self.state_district_map[state_name][district_name]
+            date = datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y")
+
+            result = external_vaccine_request(district_id=district_id, date_obj=date)
+            # adding to cache to avoid re-hit
+            self.vaccine_cache[district_name] = result
+            return result
 
 
 if __name__ == "__main__":

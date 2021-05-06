@@ -1,0 +1,77 @@
+{% extends "generic.html" %}
+
+{% block daily_data %}
+    <h4 class="text-center text-muted">State: {{current_state}}</h4>
+    <div class="container px-4">
+        <div class="row gx-1">
+
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $('.js-example-basic-single').select2();
+                });
+            </script>
+
+            <form action="{{url_for('get_vaccine_centers', state=current_state)}}" method="POST">
+                <div class="input-group mb-3">
+                    <select class=" form-select js-example-basic-single" name="district">
+
+                        <option selected>{{current_district if current_district else 'Select a District'}}</option>
+                        {% for district_name, district_id in district_dict.items() %}
+                            {% if district_name != current_district %}
+                                <option value="{{district_name}}">{{district_name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>&nbsp;&nbsp;
+                    <button type="submit" class="btn-secondary" style="width: calc(100% - 1200px);">Search</button>
+                </div>
+            </form>
+        </div>
+    </div><br><br>
+
+    {% if vaccine_data %}
+        <div class="container px-4">
+            <div class="row gx-1">
+                <table class="table table-dark table-striped table-hover">
+                    <thead>
+                        <tr>
+                            {% for row_head in vaccine_data[0] %}
+                                <th>{{row_head}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row_data in vaccine_data %}
+                            <tr>
+                                <td>{{row_data['Pincode']}}</td>
+                                <td>{{row_data['Center Name']}}</td>
+                                <td>{{row_data['Address']}}</td>
+                                <td>{{row_data['Locality']}}</td>
+                                <td>{{row_data['Session Start Time']}}</td>
+                                <td>{{row_data['Session End Time']}}</td>
+                                <td>{{row_data['Session Fee']}}</td>
+                                <td>
+                                    {% if row_data['Sessions'] %}
+                                        {% for ss in row_data['Sessions'] %}
+                                            <table class="table table-vaccine table-dark table-bordered">
+                                                {% for sk, sv in ss.items() %}
+                                                    <tr>
+                                                        <td>{{sk}} - {{ss[sk]}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <h2 class="text-white"> No Vaccine Data Available</h2>
+    {% endif %}
+
+{% endblock %}
+
+

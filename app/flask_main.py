@@ -1,5 +1,6 @@
 import datetime
-import random
+import time
+import json
 
 import pymongo
 from flask import Flask, jsonify, request, render_template, url_for
@@ -11,7 +12,7 @@ from rq_scheduler import Scheduler
 import numpy as np
 
 from config import FLASK_HOST, FLASK_PORT, MONGO_URL, TEMPLATES_PATH, STATIC_PATH, COLOR_DICT, STATE_LIST, COLOR_LIST, \
-    REDIS_CONN, RQ_CHANNELS, DEBUG
+    REDIS_CONN, RQ_CHANNELS, DEBUG, BASE_DATA_PATH
 from tools.kill_schedules import kill_schedule
 from tools.timezone_corrector import get_current_timezone_time
 from workers.data_preprocess import GraphDataFormatter
@@ -310,6 +311,52 @@ def state_analysis(state="#"):
         current_state=state,
         vaccine_data=final_formatted_vaccine_data,
         vaccine_agg=vac_agg_fn
+    )
+
+
+@app.route('/vc/get_center/<state>', methods=["GET", "POST"])
+def get_vaccine_centers(state="#"):
+    district_dict = graph_data_formatter.state_district_map[state]
+    district = request.form.get("district")
+    dist = list(district_dict.keys())[0] if not district else district
+
+    # RCONN.set(district, str(int(time.time())))
+
+    vaccine_data = graph_data_formatter.get_vaccine_center_data(state_name=state, district_name=dist)
+
+    # with open(f'{BASE_DATA_PATH}/sample_result/sample_res.json', 'r') as fp:
+    #     vaccine_data = json.load(fp)
+
+    vaccine_final_data = []
+    for i in vaccine_data['centers']:
+        vaccine_final_data.append({
+            "Pincode": i['pincode'],
+            "Center Name": i['name'],
+            "Address": i['address'],
+            "Locality": i['block_name'],
+            "Session Start Time": i['from'],
+            "Session End Time": i['to'],
+            "Session Fee": i['fee_type'],
+            "Sessions": [
+                {
+                    'Date': s['date'],
+                    'Available Capacity': s['available_capacity'],
+                    'Min Age Limit': s['min_age_limit'],
+                    'Vaccine': s['vaccine'],
+                    'Slots': ", ".join(s['slots'])
+                } for s in i['sessions']
+            ],
+
+        })
+
+    return render_template(
+        'vaccine_table.html',
+        title='Vaccination Schedule',
+        vaccine_data=vaccine_final_data,
+        district_dict=district_dict,
+        state_list=STATE_LIST,
+        current_state=state,
+        current_district=dist
     )
 
 
