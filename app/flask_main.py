@@ -47,7 +47,7 @@ if not DEBUG:
             00, 00
         ), time_zone="Asia/Kolkata"),
         func=update_reports_and_twitter_endpoints,
-        interval=3600 * 3,  # every 3 hours
+        interval=3600 * 1,  # every 1 hour
         repeat=None
     )
     print("Scheduler ->", sch)
@@ -182,9 +182,16 @@ def home():
             ('Male', 'Female', 'Transgender'),
             ('delta_male', 'delta_female', 'delta_transgender')
         ]):
+            c_title = " V/S ".join(
+                [
+                    f"Daily {c.replace('_', ' ').replace('delta', '').strip()}"
+                    if c.startswith("delta") else c.replace('_', " ")
+                    for c in col_combination
+                ]).title()
+
             final_formatted_vaccine_data.append({
                 "chart_id": f"vac_{c_+100}",
-                "chart_name": " V/S ".join([c.replace('_', " ") for c in col_combination]).title(),
+                "chart_name": c_title,
                 "chart_data": {
                     "labels": state_vaccine_daily['data']['Updated On'],
                     "datasets": [j[i][0] for j in vaccine_data for i in col_combination if
@@ -289,10 +296,16 @@ def state_analysis(state="#"):
             ('Male', 'Female', 'Transgender'),
             ('delta_male', 'delta_female', 'delta_transgender')
         ]):
+            c_title = " V/S ".join(
+                [
+                    f"Daily {c.replace('_', ' ').replace('delta', '').strip()}"
+                    if c.startswith("delta") else c.replace('_', " ")
+                    for c in col_combination
+                ]).title()
 
             final_formatted_vaccine_data.append({
                 "chart_id": f"vac_{c_}",
-                "chart_name": " V/S ".join([c.replace('_', " ") for c in col_combination]).title(),
+                "chart_name": c_title,
                 "chart_data": {
                     "labels": state_vaccine_daily['data']['Updated On'],
                     "datasets": [j[i][0] for j in vaccine_data for i in col_combination if
@@ -339,7 +352,7 @@ def get_vaccine_centers(state="#"):
     district = request.form.get("district")
     dist = list(district_dict.keys())[0] if not district else district
 
-    RCONN.set(district, str(int(time.time())))
+    RCONN.set(dist, str(int(time.time())))
 
     vaccine_data = graph_data_formatter.get_vaccine_center_data(state_name=state, district_name=dist)
 

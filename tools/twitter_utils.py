@@ -33,6 +33,13 @@ def check_mongo_collection_data(collection_name):
     return df
 
 
+def remove_tracked_user(user_list: list):
+    for user in user_list:
+        db_data = mongo['user_timeline_data'].delete_many({"name": user})
+        print(f"Deleted {user} data: {db_data.deleted_count}")
+
+    return True
+
 def de_emojify(text):
     if text:
         return text.encode('ascii', 'ignore').decode('ascii')
@@ -48,4 +55,6 @@ if __name__ == "__main__":
     # drop_collections_mongo(['twitter_stream_data'])
 
     # check_mongo_collection_data('twitter_stream_data')
-    display_collected_trending_data()
+    # display_collected_trending_data()
+
+    print(remove_tracked_user(["Covid India Seva"]))

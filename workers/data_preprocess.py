@@ -219,7 +219,7 @@ class GraphDataFormatter:
         # clearing cache if data older than 3 hours
         last_used_time = RCONN.get(district_name).decode()
 
-        if int(time.time()) - int(last_used_time) > 10800:
+        if int(time.time()) - int(last_used_time) > 1800:
             if district_name in self.vaccine_cache:
                 self.vaccine_cache.pop(district_name)
 

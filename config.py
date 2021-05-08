@@ -32,7 +32,7 @@ OXYGEN_TRACK_WORDS = ['oxygen', 'oxygen needed', 'need oxygen', 'oxygen need', '
 
 VENTILATOR_TRACK_WORDS = [word.replace('oxygen', 'ventilator') for word in OXYGEN_TRACK_WORDS]
 
-TRACKED_USERS = ["@covid19indiaorg", "@COVIDNewsByMIB", "@ANI", "@BloodDonorsIn", "@CovidIndiaSeva", "@MoHFW_INDIA"]
+TRACKED_USERS = ["@covid19indiaorg", "@BloodDonorsIn", "@COVResourcesIn"]
 HASHTAG_1 = ['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"]
 HASHTAG_2 = ["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"]
 
@@ -131,8 +131,8 @@ SENTIMENT_COLORS = {
 
 COLOR_PALETTE = ["#ffcb91", "#ffefa1", "#94ebcd", "#bfcc80"]
 
-COLOR_LIST = ['#AAEBDE', '#9BBFB9', '#8A81BF', '#A9EEA6', '#96CC81',
-              '#A78AB0', '#94D1B9', '#D9D2FB', '#D48674', '#D3656F',
+COLOR_LIST = ['#9BBFB9', '#8A81BF', '#A9EEA6',
+              '#A78AB0', '#94D1B9', '#D9D2FB', '#D48674', '#CEE7F7',
               '#AAC5E5', '#D6E7AC', '#D3ACB2', '#C2CD92', '#B3F7BE',
               '#A0828C', '#CEFC8E', '#B97D86', '#AEE971', '#727C83',
               '#E3ACF7', '#9EA3B0', '#F892BB', '#EEFCF9', '#7AC16E',
@@ -205,9 +205,10 @@ VACCINE_GRAPH_COLS = [
 ]
 
 # Removing Excess log files, Limit = 5
-sorted_logs = sorted(f"{BASE_DATA_PATH}/logs/")
+
+sorted_logs = sorted(os.listdir(os.path.join(os.sep, BASE_DATA_PATH, "logs")))
 if len(sorted_logs) > 5:
-    os.remove(f"{BASE_DATA_PATH}/logs/{sorted_logs[0]}")
+    os.remove(os.path.join(os.sep, BASE_DATA_PATH, "logs", sorted_logs[0]))
 
 if __name__ == "__main__":
     print(TABLE_ATTRIBUTES["base"])

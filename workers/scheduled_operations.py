@@ -13,7 +13,7 @@ def update_reports_and_twitter_endpoints():
     for user in tqdm(TRACKED_USERS):
         twit.get_user_timeline(user_id=user, count=50)
 
-    for _ in tqdm(range(3)):
+    for _ in tqdm(range(10)):
         x = random.choice(HASHTAG_1)
         y = random.choice(HASHTAG_2)
         twit.get_tweets_from_hashtag(hashtag=[x, y], count=50, agg_type=random.choice(['AND']))
@@ -27,3 +27,7 @@ def update_reports_and_twitter_endpoints():
     )
     print(result)
     return True
+
+
+if __name__ == "__main__":
+    print(update_reports_and_twitter_endpoints())
