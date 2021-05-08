@@ -220,98 +220,117 @@ def home():
         )
 
     except Exception as e:
-        # Todo: create a error template file
-        return render_template(f"<h1> Error: {str(e)}</h1>")
+        date = datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y")
+        with open(f"{BASE_DATA_PATH}/logs/error_logs_{date}.txt", "a", encoding="utf-8") as log_fp:
+            log_fp.write(
+                f"""\n*******************************\n
+                 Time: {datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y %H:%M:%S")},\n
+                 Function: home()\n
+                 Error: {str(e)}\n*******************************\n"""
+            )
+        return render_template('error.html')
 
 
 @app.route("/home/<state>", methods=["GET", "POST"])
 def state_analysis(state="#"):
-    # Todo: Add try except and template error handling
-    state_total, state_daily = graph_data_formatter.get_state_wise_data(state=state)
-    state_vaccine_daily, state_vaccine_agg = graph_data_formatter.get_vaccine_data(state=state)
+    try:
+        # Todo: Add try except and template error handling
+        state_total, state_daily = graph_data_formatter.get_state_wise_data(state=state)
+        state_vaccine_daily, state_vaccine_agg = graph_data_formatter.get_vaccine_data(state=state)
 
-    # structuring State data into chart-js display format
-    label = state_daily['data'][0]['x']
-    state_graphs = []
-    for chart_type in state_daily['data']:
-        state_graphs.append({
-            "chart_id": chart_type["name"],
-            "chart_data": {
-                "labels": label,
-                "datasets": [{
-                    "data": chart_type["y"],
-                    "label": chart_type["name"],
-                    "borderColor": COLOR_DICT.get(chart_type["name"].split()[0], COLOR_DICT.get(chart_type["name"], COLOR_DICT['Other'])),
-                    "tension": 0,
+        # structuring State data into chart-js display format
+        label = state_daily['data'][0]['x']
+        state_graphs = []
+        for chart_type in state_daily['data']:
+            state_graphs.append({
+                "chart_id": chart_type["name"],
+                "chart_data": {
+                    "labels": label,
+                    "datasets": [{
+                        "data": chart_type["y"],
+                        "label": chart_type["name"],
+                        "borderColor": COLOR_DICT.get(chart_type["name"].split()[0], COLOR_DICT.get(chart_type["name"], COLOR_DICT['Other'])),
+                        "tension": 0,
+                        "pointBorderWidth": 0.2,
+                        "borderWidth":1.8,
+                        "fill": False,
+                        "pointRadius": 1
+                    }]
+                }
+            })
+
+        # Structuring Vaccine data into chart-js display format
+
+        # STATE VACCINE DAILY
+        vaccine_data = []
+        final_formatted_vaccine_data = []
+
+        for vaccine_chart_type in [co for co in state_vaccine_daily['data'] if co not in ['Updated On', 'State']]:
+            vaccine_data.append({
+                vaccine_chart_type: [{
+                    "data": state_vaccine_daily['data'][vaccine_chart_type],
+                    "label": vaccine_chart_type,
+                    "borderColor": list(np.random.choice(COLOR_LIST, 1, replace=False))[0],
+                    "tension": 0.1,
                     "pointBorderWidth": 0.2,
-                    "borderWidth":1.8,
+                    "borderWidth": 1.9,
                     "fill": False,
                     "pointRadius": 1
                 }]
-            }
-        })
+            })
 
-    # Structuring Vaccine data into chart-js display format
+        for c_, col_combination in enumerate([
+            ('Total Sessions Conducted', 'Total Doses Administered'),
+            ('delta_total_sessions_conducted', 'delta_total_doses_administered'),
+            ('First Dose Administered', 'Second Dose Administered'),
+            ('delta_first_dose_administered', 'delta_second_dose_administered'),
+            ('Total Covaxin Administered', 'Total CoviShield Administered'),
+            ('delta_total_covaxin_administered', 'delta_total_covishield_administered'),
+            ('Male', 'Female', 'Transgender'),
+            ('delta_male', 'delta_female', 'delta_transgender')
+        ]):
 
-    # STATE VACCINE DAILY
-    vaccine_data = []
-    final_formatted_vaccine_data = []
+            final_formatted_vaccine_data.append({
+                "chart_id": f"vac_{c_}",
+                "chart_name": " V/S ".join([c.replace('_', " ") for c in col_combination]).title(),
+                "chart_data": {
+                    "labels": state_vaccine_daily['data']['Updated On'],
+                    "datasets": [j[i][0] for j in vaccine_data for i in col_combination if
+                                 i in j]
+                }
+            })
 
-    for vaccine_chart_type in [co for co in state_vaccine_daily['data'] if co not in ['Updated On', 'State']]:
-        vaccine_data.append({
-            vaccine_chart_type: [{
-                "data": state_vaccine_daily['data'][vaccine_chart_type],
-                "label": vaccine_chart_type,
-                "borderColor": list(np.random.choice(COLOR_LIST, 1, replace=False))[0],
-                "tension": 0.1,
-                "pointBorderWidth": 0.2,
-                "borderWidth": 1.9,
-                "fill": False,
-                "pointRadius": 1
-            }]
-        })
+        vac_agg_fn = {}
+        for k, v in state_vaccine_agg.items():
+            k = k.replace('Total', "").strip()
+            if k.startswith('delta'):
+                k = " ".join(k.split("_"))
+                k = k.replace("delta", "").strip()
+                k = f"{k} Per Day".title()
 
-    for c_, col_combination in enumerate([
-        ('Total Sessions Conducted', 'Total Doses Administered'),
-        ('delta_total_sessions_conducted', 'delta_total_doses_administered'),
-        ('First Dose Administered', 'Second Dose Administered'),
-        ('delta_first_dose_administered', 'delta_second_dose_administered'),
-        ('Total Covaxin Administered', 'Total CoviShield Administered'),
-        ('delta_total_covaxin_administered', 'delta_total_covishield_administered'),
-        ('Male', 'Female', 'Transgender'),
-        ('delta_male', 'delta_female', 'delta_transgender')
-    ]):
+            vac_agg_fn[k] = v
 
-        final_formatted_vaccine_data.append({
-            "chart_id": f"vac_{c_}",
-            "chart_name": " V/S ".join([c.replace('_', " ") for c in col_combination]).title(),
-            "chart_data": {
-                "labels": state_vaccine_daily['data']['Updated On'],
-                "datasets": [j[i][0] for j in vaccine_data for i in col_combination if
-                             i in j]
-            }
-        })
+        return render_template(
+            'statewise.html',
+            title='Dashboard',
+            daily_data=state_total,
+            state_daily=state_graphs,
+            state_list=STATE_LIST,
+            current_state=state,
+            vaccine_data=final_formatted_vaccine_data,
+            vaccine_agg=vac_agg_fn
+        )
 
-    vac_agg_fn = {}
-    for k, v in state_vaccine_agg.items():
-        k = k.replace('Total', "").strip()
-        if k.startswith('delta'):
-            k = " ".join(k.split("_"))
-            k = k.replace("delta", "").strip()
-            k = f"{k} Per Day".title()
-
-        vac_agg_fn[k] = v
-
-    return render_template(
-        'statewise.html',
-        title='Dashboard',
-        daily_data=state_total,
-        state_daily=state_graphs,
-        state_list=STATE_LIST,
-        current_state=state,
-        vaccine_data=final_formatted_vaccine_data,
-        vaccine_agg=vac_agg_fn
-    )
+    except Exception as e:
+        date = datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y")
+        with open(f"{BASE_DATA_PATH}/logs/error_logs_{date}.txt", "a", encoding="utf-8") as log_fp:
+            log_fp.write(
+                f"""\n*******************************\n
+                 Time: {datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y %H:%M:%S")},\n
+                 Function: state_analysis()\n
+                 Error: {str(e)}\n*******************************\n"""
+            )
+        return render_template('error.html')
 
 
 @app.route('/vc/get_center/<state>', methods=["GET", "POST"])
@@ -320,10 +339,11 @@ def get_vaccine_centers(state="#"):
     district = request.form.get("district")
     dist = list(district_dict.keys())[0] if not district else district
 
-    # RCONN.set(district, str(int(time.time())))
+    RCONN.set(district, str(int(time.time())))
 
     vaccine_data = graph_data_formatter.get_vaccine_center_data(state_name=state, district_name=dist)
 
+    # To test the data without hitting api multiple times and avoid rate limit
     # with open(f'{BASE_DATA_PATH}/sample_result/sample_res.json', 'r') as fp:
     #     vaccine_data = json.load(fp)
 

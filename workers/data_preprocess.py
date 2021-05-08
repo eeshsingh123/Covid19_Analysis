@@ -217,25 +217,25 @@ class GraphDataFormatter:
 
     def get_vaccine_center_data(self, state_name=None, district_name=None):
         # clearing cache if data older than 3 hours
-        # last_used_time = RCONN.get(district_name).decode()
+        last_used_time = RCONN.get(district_name).decode()
 
-        # if int(time.time()) - int(last_used_time) > 10800:
-        #     if district_name in self.vaccine_cache:
-        #         self.vaccine_cache.pop(district_name)
+        if int(time.time()) - int(last_used_time) > 10800:
+            if district_name in self.vaccine_cache:
+                self.vaccine_cache.pop(district_name)
 
-        # else:
-        if district_name in self.vaccine_cache:
-            return self.vaccine_cache[district_name]
         else:
-            assert state_name in self.state_district_map, f"Invalid State: {state_name} name for State Map Dict"
-            assert district_name in self.state_district_map[state_name], f"Invalid District:{district_name} for State: {state_name}"
-            district_id = self.state_district_map[state_name][district_name]
-            date = datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y")
+            if district_name in self.vaccine_cache:
+                return self.vaccine_cache[district_name]
+            else:
+                assert state_name in self.state_district_map, f"Invalid State: {state_name} name for State Map Dict"
+                assert district_name in self.state_district_map[state_name], f"Invalid District:{district_name} for State: {state_name}"
+                district_id = self.state_district_map[state_name][district_name]
+                date = datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y")
 
-            result = external_vaccine_request(district_id=district_id, date_obj=date)
-            # adding to cache to avoid re-hit
-            self.vaccine_cache[district_name] = result
-            return result
+                result = external_vaccine_request(district_id=district_id, date_obj=date)
+                # adding to cache to avoid re-hit
+                self.vaccine_cache[district_name] = result
+                return result
 
 
 if __name__ == "__main__":

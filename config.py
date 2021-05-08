@@ -204,5 +204,10 @@ VACCINE_GRAPH_COLS = [
        'delta_total_doses_administered'
 ]
 
+# Removing Excess log files, Limit = 5
+sorted_logs = sorted(f"{BASE_DATA_PATH}/logs/")
+if len(sorted_logs) > 5:
+    os.remove(f"{BASE_DATA_PATH}/logs/{sorted_logs[0]}")
+
 if __name__ == "__main__":
     print(TABLE_ATTRIBUTES["base"])
