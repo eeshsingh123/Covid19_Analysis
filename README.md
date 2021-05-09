@@ -59,14 +59,19 @@ the Front-end via Flask app
 
 ### NEW FLASK BASED APP:
 HOME PAGE: 
-![](misc/flsk/d_home2.png) ![](misc/flsk/d_home1.png) ![](misc/flsk/d_home3.png) ![](misc/flsk/d_home4.png)
-![](misc/flsk/d_home5.png) ![](misc/flsk/d_home6.png) ![](misc/flsk/d_home7.png)
+![](misc/d_home2.png)
+![](misc/d_home1.png)
+![](misc/d_home3.png)
+![](misc/d_home4.png)
+![](misc/d_home5.png)
+![](misc/d_home6.png)
+![](misc/d_home7.png)
 
 STATE DISTRIBUTION:
-![](misc/flsk/state_home1.png)
+![](misc/state_home1.png)
 
 VACCINATION AVAILABILITY:
-![](misc/flsk/vac_home1.png)
+![](misc/vac_home1.png)
 
 ### OLD CORE DASH APP :
 **New Feature**
