@@ -1,6 +1,8 @@
 # Covid19_Analysis
 
 **NOTE** 
+It is recommended that you view this website via a PC or Laptop as some features may not be visible properly on Mobile devices.
+
 This App is not hosted yet, it can be used via this Ngrok link: ____ (this can be changed everytime,
 and it may not be available at odd hours as it is locally hosted for demo purpose)
 Check screenshots below to see the actual APP.
