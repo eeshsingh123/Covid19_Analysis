@@ -58,19 +58,25 @@ the Front-end via Flask app
 6. `/tools` : Contains Helper functions to perform tasks needed
 
 ### NEW FLASK BASED APP:
-HOME PAGE: 
+**HOME PAGE**: 
 ![](misc/d_home2.png)
+
 ![](misc/d_home1.png)
+
 ![](misc/d_home3.png)
+
 ![](misc/d_home4.png)
+
 ![](misc/d_home5.png)
+
 ![](misc/d_home6.png)
+
 ![](misc/d_home7.png)
 
-STATE DISTRIBUTION:
+**STATE DISTRIBUTION**:
 ![](misc/state_home1.png)
 
-VACCINATION AVAILABILITY:
+**VACCINATION AVAILABILITY**:
 ![](misc/vac_home1.png)
 
 ### OLD CORE DASH APP :
