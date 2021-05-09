@@ -1,5 +1,14 @@
 # Covid19_Analysis
 
+**NOTE** 
+This App is not hosted yet, it can be used via this Ngrok link: ____ (this can be changed everytime, and it may not to available as it is locally hosted for demo purpose)
+Check screenshots below to see the actual APP.
+
+All the data has been collection from official Covid-19 resource:
+   1. https://api.covid19india.org/
+   2. https://apisetu.gov.in/public/api/cowin (use with caution: can be rate limited. I have added caching to avoid hitting the API endpoint every call)
+   3. https://twitter.com/home
+
 ### Pre-requisites:
 1. Create Twitter API tokens 
     * Create an account on `https://developer.twitter.com`
