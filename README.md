@@ -89,7 +89,7 @@ the Front-end via Flask app
 **VACCINATION AVAILABILITY**:
 ![](misc/vac_home1.png)
 
-### OLD CORE DASH APP :
+### OLD CORE DASH APP : (NOT IN USE NOW..)
 **New Feature**
 ![](misc/daily_change.png)
 ![](misc/world.png)
