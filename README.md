@@ -1,7 +1,8 @@
 # Covid19_Analysis
 
 **NOTE** 
-This App is not hosted yet, it can be used via this Ngrok link: ____ (this can be changed everytime, and it may not to available as it is locally hosted for demo purpose)
+This App is not hosted yet, it can be used via this Ngrok link: ____ (this can be changed everytime,
+and it may not be available at odd hours as it is locally hosted for demo purpose)
 Check screenshots below to see the actual APP.
 
 All the data has been collection from official Covid-19 resource:
