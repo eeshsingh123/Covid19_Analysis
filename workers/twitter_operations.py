@@ -7,7 +7,7 @@ from tweepy import OAuthHandler
 from pymongo import InsertOne, MongoClient
 from tqdm import tqdm
 
-from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from data.creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from config import MONGO_URL, DB_NAME, USER_HASHTAG_KEEP_DAYS
 
 mongo = MongoClient(MONGO_URL)[DB_NAME]
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     from config import TRACKED_USERS
 
     for u in tqdm(TRACKED_USERS):
-        t.get_user_timeline(user_id=u, count=50)
+        t.get_user_timeline(user_id=u, count=10)
 
     # print(t.get_user_timeline(user_id="@covid19indiaorg", count=20))
     #

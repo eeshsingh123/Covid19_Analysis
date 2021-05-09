@@ -1,0 +1,42 @@
+version: '3.3'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  redis:
+    image: 'redis:alpine'
+    restart: always
+    networks:
+      - app-tier
+
+  mongodb:
+    image: mongo:3.6
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=dbpass123
+    volumes:
+      - '/c/Projects/Python_projects/Covid19_Analysis/mongo_docker/data:/data/db'
+
+  covid_dashboard:
+    build: .
+    restart: always
+    environment:
+      - DEBUG=False
+      - DASHBOARD_PATH=/home/dashboard
+      - DASHBOARD_DATA_PATH=/home/dashboard_data
+      - REDIS_HOST=redis
+      - FLASK_PORT=7916
+    ports:
+      - "7916:7916"
+    volumes:
+      - type: bind
+        source: /c/Projects/Python_projects/Covid19_Analysis/data
+        target: /home/dashboard_data/
+    networks:
+      - app-tier
+

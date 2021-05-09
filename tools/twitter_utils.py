@@ -1,11 +1,8 @@
-import time
-
 import tweepy
 from tweepy import OAuthHandler
 from pymongo import InsertOne, MongoClient
 import pandas as pd
 
-from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from config import MONGO_URL, DB_NAME, SEARCH_BY_HASHTAG
 
 mongo = MongoClient(MONGO_URL)[DB_NAME]

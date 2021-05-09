@@ -1,19 +1,20 @@
 import os
 import json
 
-DEBUG = os.environ.get("DEBUG", True)
-LTS = True if not DEBUG else False
+DEBUG = True if os.environ.get("DEBUG", "True") == "True" else False
+IN_DOCKER = True if os.environ.get("IN_DOCKER", "True") == "True" else False
 
-if LTS:
-    BASE_PATH = os.environ.get("BASE_PATH", os.path.join(os.sep, 'mnt', 'c', 'Projects', 'Python_projects', 'Covid19_Analysis'))
-    BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH",
-                                    os.path.join(os.sep, 'mnt', 'c', 'Projects', 'Python_projects', 'Covid19_Analysis', 'data'))
-else:
-    BASE_PATH = os.environ.get("BASE_PATH", os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis'))
-    BASE_DATA_PATH = os.environ.get("BASE_DATA_PATH",
-                                    os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis', 'data'))
-    if not os.path.isdir(BASE_PATH):
+BASE_PATH = os.environ.get("DASHBOARD_PATH", os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis'))
+BASE_DATA_PATH = os.environ.get("DASHBOARD_DATA_PATH",
+                                os.path.join(os.sep, 'Projects', 'Python_projects', 'Covid19_Analysis', 'data'))
+
+print("DEBUG: ", DEBUG)
+if DEBUG:
+    if not os.path.isdir(BASE_DATA_PATH):
         os.mkdir(BASE_DATA_PATH)
+
+FLASK_HOST = os.environ.get('FLASK_HOST', "127.0.0.1")
+FLASK_PORT = os.environ.get('FLASK_PORT', 7916)
 
 RQ_CHANNELS = {'data_updater': 'daily_data_updater'}
 
@@ -21,6 +22,28 @@ REDIS_CONN = {
     "host": os.environ.get("REDIS_HOST", "localhost"),
     "port": os.environ.get("REDIS_PORT", 6379)
 }
+
+TEMPLATES_PATH = os.environ.get("EDA_TEMPLATES_PATH", os.path.join(os.sep, BASE_PATH, "templates"))
+STATIC_PATH = os.environ.get("EDA_STATIC_PATH", os.path.join(os.sep, BASE_PATH, "static"))
+
+MONGO_DB = {
+    "host": os.environ.get("INTERNAL_HOST_IP", "localhost"),
+    "port": "27017",
+    "user": "admin",
+    "password": "dbpass123",
+    "db": "covid_db"
+}
+
+# if DEBUG:
+#     DB_NAME = MONGO_DB['db']
+#     MONGO_URL = f"mongodb+srv://admin:{MONGO_DB['password']}@covidcluster.b7l6l.mongodb.net/{DB_NAME}?ssl=true&ssl_cert_reqs=CERT_NONE&retryWrites=true&w=majority"
+# else:
+MONGO_URL_ADMIN = f"mongodb://{MONGO_DB['user']}:{MONGO_DB['password']}@{MONGO_DB['host']}:{MONGO_DB['port']}/admin"
+DB_NAME = MONGO_DB['db']
+MONGO_URL = f"mongodb://{MONGO_DB['user']}:{MONGO_DB['password']}@{MONGO_DB['host']}:{MONGO_DB['port']}/" \
+            + DB_NAME + "?authSource=admin"
+
+####################################################################
 
 COVID_TRACK_WORDS = ['corona', 'covid19', 'covid-19', 'pandemic', 'virus', 'vaccine', 'vaccination', 'remdesivir injection', 'remdesivir']
 
@@ -37,32 +60,13 @@ HASHTAG_1 = ['#Help', '#Help', '#Urgent', '#urgent', "Available", "#available"]
 HASHTAG_2 = ["#Beds", "#Oxygen", "#Remdesivir", "#Ventilator", "#Crematorium", "#Vaccine"]
 
 STREAM_DATA_KEEP_DAYS = 5
-USER_HASHTAG_KEEP_DAYS = 30
+USER_HASHTAG_KEEP_DAYS = 20
 
 SEARCH_BY_HASHTAG = {
     'bed': 'bed',
     'oxygen': 'oxygen',
     'ventilator': 'ventilator'
 }
-
-TEMPLATES_PATH = os.environ.get("EDA_TEMPLATES_PATH", os.path.join(os.sep, BASE_PATH, "templates"))
-STATIC_PATH = os.environ.get("EDA_STATIC_PATH", os.path.join(os.sep, BASE_PATH, "static"))
-
-FLASK_HOST = os.environ.get('FLASK_HOST', "127.0.0.1")
-FLASK_PORT = os.environ.get('FLASK_PORT', 7916)
-
-MONGO_DB = {
-    "host": "localhost",
-    "port": "27017",
-    "user": "admin",
-    "password": "dbpass123",
-    "db": "covid_db"
-}
-
-MONGO_URL_ADMIN = f"mongodb://{MONGO_DB['user']}:{MONGO_DB['password']}@{MONGO_DB['host']}:{MONGO_DB['port']}/admin"
-DB_NAME = MONGO_DB['db']
-MONGO_URL = f"mongodb://{MONGO_DB['user']}:{MONGO_DB['password']}@{MONGO_DB['host']}:{MONGO_DB['port']}/" \
-            + DB_NAME + "?authSource=admin"
 
 # Loading default objects
 with open(os.path.join(os.sep, BASE_DATA_PATH, 'default_objects', 'stopword_collection.json'), 'r') as stp:

@@ -15,9 +15,9 @@ from tweepy.streaming import StreamListener
 from textblob import TextBlob
 from pymongo import InsertOne, MongoClient
 
-from creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from data.creds.credentials import CONSUMER_KEY, CONSUMER_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from config import STOP_WORDS, MONGO_URL, DB_NAME, COVID_TRACK_WORDS, BED_TRACK_WORDS, VENTILATOR_TRACK_WORDS, \
-    OXYGEN_TRACK_WORDS, STREAM_DATA_KEEP_DAYS
+    OXYGEN_TRACK_WORDS, STREAM_DATA_KEEP_DAYS, DEBUG, MONGO_DB
 from tools.twitter_utils import de_emojify
 
 bad_words = Counter(dict(zip(STOP_WORDS, [1000000]*len(STOP_WORDS))))
@@ -26,6 +26,8 @@ split_regex = re.compile("[ \n" + re.escape("".join(punctuations)) + ']')
 
 mongo = MongoClient(MONGO_URL)[DB_NAME]
 
+print(f"MONGO HOST: {MONGO_DB['host']}")
+
 
 class Listener(StreamListener):
 
@@ -33,8 +35,8 @@ class Listener(StreamListener):
         super().__init__(api=None)
         self.covid_data_list = []
         self.value_list = []
-        self.thresh = 5
-        self.trending_thresh = 500
+        self.thresh = 20
+        self.trending_thresh = 1000
         self.counter, self.trending_counter = 0, 0
 
     def on_connect(self):
@@ -70,11 +72,12 @@ class Listener(StreamListener):
             else:
                 tweet_data = de_emojify(unidecode(tweet['extended_tweet']['full_text']))
 
-            print("TEXT-> ", tweet_data)
-            print("CREATED_AT-> ", created_at)
-            print("USER_LOCATION-> ", user_location)
-            print("VERIFIED-> ", user_verified)
-            print('---------------------------------------------------------------------\n')
+            if DEBUG:
+                print("TEXT-> ", tweet_data)
+                print("CREATED_AT-> ", created_at)
+                print("USER_LOCATION-> ", user_location)
+                print("VERIFIED-> ", user_verified)
+                print('---------------------------------------------------------------------\n')
 
             data_to_insert = {
                 "timestamp_ms": timestamp_ms,
@@ -134,7 +137,7 @@ class Listener(StreamListener):
 
 def generate_trending():
     try:
-        deletion_logic = {"code": {"$lt": int(time.time()) - 86400 * STREAM_DATA_KEEP_DAYS}}  # 3 days old remove
+        deletion_logic = {"code": {"$lt": int(time.time()) - 43200 * STREAM_DATA_KEEP_DAYS}}  # 0.5 days old remove
         mongo['twitter_stream_data'].remove(deletion_logic)
         mongo['trending_data'].remove(deletion_logic)
 

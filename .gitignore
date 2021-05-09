@@ -1,6 +1,9 @@
 # Project level gitignore
 data/
-creds/
+data/creds/
+mongo_docker/data/*
+!mongo_docker/data/.gitkeep
+
 twitter_db/
 .idea/
 .DS_Store
